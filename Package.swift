@@ -31,7 +31,10 @@ let package = Package(
                 .product(name: "Sparkle", package: "Sparkle"),
                 .product(name: "Lottie", package: "lottie-ios")
             ],
-            path: "Sources/ReMastera"
+            path: "Sources/ReMastera",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .executableTarget(
             name: "ReMastera",

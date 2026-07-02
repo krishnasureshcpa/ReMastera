@@ -13,7 +13,7 @@ public struct RemyMascot: View {
         // Use a placeholder or generic Rive file name until a specific one is provided.
         // We initialize the model with a hypothetical "remy" asset. 
         // If not found in the bundle, Rive handles it gracefully (or we provide fallback).
-        self._riveModel = StateObject(wrappedValue: RiveViewModel(fileName: "remy"))
+        self._riveModel = StateObject(wrappedValue: RiveViewModel(fileName: "remy", in: Bundle.module, stateMachineName: nil))
     }
     
     public var body: some View {

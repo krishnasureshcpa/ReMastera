@@ -12,15 +12,16 @@ public struct SubtitleStage: PipelineStage {
             return
         }
         
-        context.addLog("Scanning for local subtitle extraction backend (whisper-cli)...")
+        context.addLog("Scanning for local subtitle extraction backend (whisper-cpp)...")
         
-        guard let whisperURL = DependencyDetector.locateTool("whisper-cli") else {
-            context.addLog("⚠ whisper-cli not found. Skipping subtitle extraction.")
+        let whisperURL = DependencyDetector.locateTool("whisper-cpp") ?? DependencyDetector.locateTool("whisper-cli")
+        guard let whisperURL = whisperURL else {
+            context.addLog("⚠ whisper-cpp not found. Skipping subtitle extraction.")
             context.addLog("Install instructions: Run 'brew install whisper-cpp' and configure a model.")
             return
         }
         
-        context.addLog("whisper-cli found at \(whisperURL.path). Starting subtitle extraction...")
+        context.addLog("Subtitle backend found at \(whisperURL.path). Starting subtitle extraction...")
         
         let outputSRTURL = context.tempDirectoryURL.appendingPathComponent("subtitles.srt")
         let modelDir = FileManager.default.homeDirectoryForCurrentUser

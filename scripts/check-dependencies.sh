@@ -23,6 +23,15 @@ check_tool() {
         tool_path="/opt/homebrew/bin/$tool_name"
     elif [ -f "/usr/local/bin/$tool_name" ]; then
         tool_path="/usr/local/bin/$tool_name"
+    elif [ "$tool_name" = "whisper-cpp" ] && command -v "whisper-cli" >/dev/null 2>&1; then
+        tool_path="$(command -v "whisper-cli")"
+        tool_name="whisper-cli"
+    elif [ "$tool_name" = "whisper-cpp" ] && [ -f "/opt/homebrew/bin/whisper-cli" ]; then
+        tool_path="/opt/homebrew/bin/whisper-cli"
+        tool_name="whisper-cli"
+    elif [ "$tool_name" = "whisper-cpp" ] && [ -f "/usr/local/bin/whisper-cli" ]; then
+        tool_path="/usr/local/bin/whisper-cli"
+        tool_name="whisper-cli"
     fi
     
     if [ -n "$tool_path" ]; then
@@ -55,7 +64,7 @@ failed=0
 
 check_tool "ffmpeg" true "Required for video decoding, filtration, and hardware-accelerated HEVC encoding." || failed=1
 check_tool "ffprobe" true "Required for metadata scanning, duration extraction, and format identification." || failed=1
-check_tool "whisper-cli" false "Enables local subtitle extraction from audio tracks."
+check_tool "whisper-cpp" false "Enables local subtitle extraction from audio tracks."
 check_tool "realesrgan-ncnn-vulkan" false "Enables AI-powered resolution scaling plugins."
 check_tool "rife-ncnn-vulkan" false "Enables local video frame interpolation plugins."
 check_tool "dovi_tool" false "Enables parsing and inject of Dolby Vision RPU metadata."

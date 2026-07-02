@@ -13,19 +13,28 @@ if [ ! -f "$DMG_PATH" ]; then
 fi
 
 echo "Mounting DMG..."
-MOUNT_POINT=$(hdiutil attach -nobrowse "$DMG_PATH" | grep /Volumes | awk '{for (i=3; i<=NF; i++) printf $i " "; print ""}' | sed 's/ $//')
+MOUNT_POINT=$(hdiutil attach -nobrowse "$DMG_PATH" | grep "/Volumes/" | awk -F '\t' '{print $3}' | xargs)
 echo "Mounted at $MOUNT_POINT"
 
-echo "Copying to Applications (requires sudo/admin permissions if Applications is protected, but usually works for standard installs)..."
-# Remove existing
-rm -rf "$DEST_PATH"
-cp -R "$MOUNT_POINT/$APP_NAME" "$DEST_PATH"
+echo "Copying to Applications..."
+if [ -w "/Applications" ]; then
+    rm -rf "$DEST_PATH"
+    cp -R "$MOUNT_POINT/$APP_NAME" "$DEST_PATH"
+else
+    echo "  -> Applications directory is write-protected. Copying with administrative privileges (sudo)..."
+    sudo rm -rf "$DEST_PATH"
+    sudo cp -R "$MOUNT_POINT/$APP_NAME" "$DEST_PATH"
+fi
 
 echo "Unmounting DMG..."
-hdiutil detach "$MOUNT_POINT"
+hdiutil detach "$MOUNT_POINT" >/dev/null
 
 echo "Removing quarantine attributes to allow running..."
-xattr -rd com.apple.quarantine "$DEST_PATH" || true
+if [ -w "$DEST_PATH" ]; then
+    xattr -rd com.apple.quarantine "$DEST_PATH" || true
+else
+    sudo xattr -rd com.apple.quarantine "$DEST_PATH" || true
+fi
 
 echo "Installation complete: $DEST_PATH"
 echo "Launching ReMastera..."

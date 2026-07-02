@@ -102,7 +102,7 @@ public struct DependencyDetector {
         let tools = [
             ("ffmpeg", true, "Required for video decoding, filtering, and final encoding.", "brew install ffmpeg"),
             ("ffprobe", true, "Required for reading video metadata, resolution, and audio details.", "brew install ffmpeg"),
-            ("whisper-cli", false, "Enables offline subtitle extraction (Whisper backend).", "brew install whisper-cpp"),
+            ("whisper-cpp", false, "Enables offline subtitle extraction (Whisper backend).", "brew install whisper-cpp"),
             ("realesrgan-ncnn-vulkan", false, "Enables local AI-powered resolution upscaling.", "brew install realesrgan-ncnn-vulkan"),
             ("rife-ncnn-vulkan", false, "Enables local AI-powered video frame interpolation.", "brew install rife-ncnn-vulkan"),
             ("dovi_tool", false, "Enables Dolby Vision metadata injection and workflow.", "brew install dovi_tool")
@@ -111,7 +111,8 @@ public struct DependencyDetector {
         var results: [DependencyInfo] = []
         
         for (name, isRequired, purpose, installCmd) in tools {
-            if let url = locateTool(name) {
+            let actualName = name == "whisper-cpp" ? (locateTool("whisper-cpp") != nil ? "whisper-cpp" : "whisper-cli") : name
+            if let url = locateTool(actualName) {
                 let version = queryVersion(for: url) ?? "Found"
                 results.append(DependencyInfo(
                     name: name,

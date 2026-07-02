@@ -1,160 +1,104 @@
-<div align="center">
-  <h1>ReMastera</h1>
-  <p><b>Native macOS Media Processing Suite</b></p>
+# ReMastera
+## Native macOS Media Processing Suite
 
-  <p>
-    <a href="https://github.com/krishnasureshcpa/ReMastera/releases">
-      <img src="https://img.shields.io/github/v/release/krishnasureshcpa/ReMastera?style=flat-square&color=007AFF&logo=apple" alt="Release" />
-    </a>
-    <a href="https://swift.org">
-      <img src="https://img.shields.io/badge/Swift-6.0-F05138.svg?style=flat-square&logo=swift" alt="Swift 6.0" />
-    </a>
-    <a href="https://developer.apple.com/macos">
-      <img src="https://img.shields.io/badge/macOS-14.0%2B-000000.svg?style=flat-square&logo=apple" alt="macOS 14.0+" />
-    </a>
-    <a href="https://github.com/krishnasureshcpa/ReMastera/actions">
-      <img src="https://img.shields.io/github/actions/workflow/status/krishnasureshcpa/ReMastera/ci.yml?style=flat-square&logo=githubactions" alt="Build Status" />
-    </a>
-  </p>
-</div>
+[![Release](https://img.shields.io/github/v/release/krishnasureshcpa/ReMastera?style=flat-square&color=E63946&logo=apple)](https://github.com/krishnasureshcpa/ReMastera/releases)
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-F05138.svg?style=flat-square&logo=swift)](https://swift.org)
+[![macOS 15.0+](https://img.shields.io/badge/macOS-15.0%2B-000000.svg?style=flat-square&logo=apple)](https://developer.apple.com/macos)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/krishnasureshcpa/ReMastera/ci.yml?style=flat-square&logo=githubactions)](https://github.com/krishnasureshcpa/ReMastera/actions)
 
-ReMastera is a native macOS application for local, private, and offline video remastering. It restores and refines old or low-quality videos into modern, clean, and cinematic masters while maintaining efficient output file sizes.
+ReMastera is a native macOS application for local, private, and offline video remastering. It restores and refines old or low-quality videos into modern, clean, and cinematic masters using hardware-accelerated HEVC 10-bit VideoToolbox encoding.
 
-## The ReMastera Privacy Promise
+---
 
-ReMastera is designed on a local-first architecture. It guarantees:
+## ✦ Stark Swiss Design & Mascot Character
 
-- Zero Telemetry and Analytics: The application does not collect usage metrics, crash reports, or click analysis.
-- Zero Cloud Uploads: All video and audio processing is executed locally on your Mac. No files leave your machine.
-- No Silent background downloads: Software dependencies and model configurations are never downloaded in the background without explicit user permission.
-- Completely Offline: Once dependencies are configured, the app operates without requiring an internet connection.
+ReMastera is built with a custom design language inspired by **Swiss International Typographic style + Selective Neumorphism**, moving away from standard matrix terminals or gamified "AI toy" looks:
+- **Typography**: stark Bebas Neue for headers, DM Sans for text, and DM Mono for console output.
+- **Accents**: bold Swiss Crimson Red (`#E63946`) and deep structural grays with selective dual-shadow neumorphic embossing.
+- **Mascot (Remy)**: Features a real local Rive runtime animation file (`remy.riv`) bundled inside the module's resources. Remy responds dynamically to job stages with visual moods (`.working`, `.happy`, `.thinking`, `.talking`, `.idle`).
 
-## System Requirements
+---
 
-- Operating System: macOS 15.0 (Sequoia) or newer.
-- Hardware: Apple Silicon (M1, M2, M3, M4, or newer) is highly recommended for hardware-accelerated HEVC 10-bit VideoToolbox encoding.
-- Package Manager: Homebrew is required for automatic dependency installation.
+## 1. System Requirements
 
-## Feature Overview
+- **Operating System**: macOS 15.0 (Sequoia) or newer.
+- **Hardware**: Apple Silicon (M1, M2, M3, M4, or newer) for hardware-accelerated encoding/decoding.
+- **Package Manager**: Homebrew is required for resolving external CLI dependencies.
 
-### Currently Implemented (MVP)
+---
 
-- Ingestion Zone: Drag and drop files or directories recursively scanning for `mp4`, `mov`, `mkv`, `avi`, `m4v`, and `webm` extensions.
-- Processing Presets: Segmented profiles (Fast Preview, Compact 4K, Balanced 4K, Archival 4K, and Original Resolution Enhanced) with pre-set video and audio bitrates.
-- Size Estimator: Live byte output estimation based on selected preset parameters and clip duration.
-- Folder Mirroring: Recreates input subdirectory structures inside output directories during batch processing.
-- Overwrite Configurations: Automatically creates numbered copies (e.g., `Clip 2.mp4`) to prevent accidental data loss.
-- Denoise Stage: Applies the high-quality 3D denoiser filter (hqdn3d) to clean up sensor noise and film grain.
-- Cinematic Color: Applies a Kodak 5247-inspired color balance and contrast grading curve.
-- Standard Upscaling: Rescales video outputs to 4K resolution (3840x2160) using Lanczos interpolation.
-- HDR10 Container Tagging: Integrates Rec.2020 color primaries and PQ transfer characteristics (smpte2084) for high dynamic range playback.
-- Subtitle Stage: Detects and executes subtitle extractions using local `whisper-cli` tooling.
-- Active Queue Manager: Lists pending, processing, completed, and failed tasks with custom console logs and retry actions.
+## 2. External Dependencies
 
-### Immersive Interactive CLI Dashboard
-ReMastera provides a stunning Terminal User Interface (TUI) built using Python's `Rich` and `Textual`. It runs the Swift video-processing core asynchronously in the background while displaying real-time rendering metrics, progress bars, and cinematic amber-themed logs.
+ReMastera delegates specialized local processing to verified command-line utilities.
 
-To install and launch the CLI dashboard:
-```bash
-./scripts/install-cli.sh
-source cli/.venv/bin/activate
-remastera --help
-```
+| Dependency | Purpose | Install Command | Required |
+|---|---|---|---|
+| **FFmpeg** | Video decoding, subtitle merging, and audio mapping | `brew install ffmpeg` | **Yes** |
+| **FFprobe** | Video metadata scanning, durations, and formats | `brew install ffmpeg` | **Yes** |
+| **Whisper.cpp** | Local speech-to-text subtitle extraction | `brew install whisper-cpp` | No (Optional) |
+| **Real-ESRGAN** | Local AI-powered resolution upscaling | `brew install realesrgan-ncnn-vulkan` | No (Optional) |
+| **RIFE** | Local AI-powered video frame interpolation | `brew install rife-ncnn-vulkan` | No (Optional) |
+| **dovi_tool** | Dolby Vision metadata mapping and extraction | `brew install dovi_tool` | No (Optional) |
 
-### Planned for Future Release
+> [!NOTE]
+> The dependency scanner is designed to search for `whisper-cpp` first (as packaged by default by Homebrew) with automatic fallback detection to `whisper-cli` if custom compiled.
 
-- Core ML Real-ESRGAN: True neural resolution enhancement using Apple Silicon Neural Engine accelerators.
-- WhisperKit: Swift-native subtitle extraction directly inside the app process.
-- RIFE Frame Interpolation: Smooth local frame rate conversions (e.g., up to 60 fps).
-- Dolby Vision RPU Injector: Integrates `dovi_tool` command line workflows for parsing and merging dynamic HDR metadata.
-- Multichannel Audio Passthrough: Advanced mapping of ADM/BWF tracks.
-- Local voice conversion: Offline text-to-speech and translation dubbing tools.
+---
 
-## Installation and Setup
+## 3. Quick-Start Setup
 
-### 1. Bootstrap Setup
-
-To install missing dependencies and verify system compatibility, run the interactive bootstrap utility in your terminal:
-
+### Phase A: Bootstrap Onboarding
+To inspect configurations, verify Homebrew, install dependencies, and build the application, run the interactive bootstrap:
 ```bash
 ./scripts/bootstrap.sh
 ```
 
-### 2. Manual Dependency Configuration
-
-Install required multimedia binaries using Homebrew:
-
-```bash
-# Required tools
-brew install ffmpeg
-
-# Optional tools
-brew install whisper-cpp realesrgan-ncnn-vulkan rife-ncnn-vulkan dovi_tool
-```
-
-Verify your dependency status by running:
-
+### Phase B: Verification commands
+Verify that your dependencies are mapped correctly on your PATH:
 ```bash
 ./scripts/check-dependencies.sh
 ```
 
-## Running and Building from Source
+---
+
+## 4. Compilation & Verification
 
 ### Run Directly
-
-To compile and launch the application directly from your terminal using Swift Package Manager, execute:
-
+To launch the SwiftUI application window directly using Swift Package Manager:
 ```bash
 swift run ReMastera
 ```
 
-### Compile Release Binary
-
-To build the release version, run:
-
-```bash
-./scripts/build.sh
-```
-
-The executable is compiled under `.build/release/ReMastera`.
-
-### Run Automated Tests
-
-ReMastera contains a unit test suite executing path mirroring, size estimation, tag sorting, and preset calculations. Run the tests using:
-
+### Run Tests
+To run the automated verification suite (covering tag sorting, size estimations, path builders, and pipeline state changes) on a command-line environment:
 ```bash
 ./scripts/test.sh
 ```
 
-### Package the App Bundle
-
-To package the release binary as a standard macOS application bundle and generate a distributable zip archive, run:
-
+### Package App Bundle & DMG
+To compile the release binary, package it into a standalone macOS `.app` bundle, generate a `.dmg` installer volume, and deploy to your Applications folder:
 ```bash
 ./scripts/package.sh
 ```
+- Standalone App: `ReMastera.app` (in root directory)
+- Installer DMG: `ReMastera.dmg` (in root directory)
+- Installed Application: `~/Applications/ReMastera.app`
 
-The output bundle is generated at `build/ReMastera.app`, and the distribution zip lands at `build/Dist/ReMastera-macOS.zip`.
+> [!IMPORTANT]
+> The script automatically renames any pre-existing installation at `~/Applications/ReMastera.app` using the format `ReMastera-Mmm-dd-yyyy-hh-mm-am/pm.app` to prevent data loss.
 
-## Advanced Workflow Clarification
+### Mount, Extract & Install Script
+To mount the packaged DMG, extract the app bundle, copy it to your global `/Applications/` directory (prompting for permissions if protected), and launch the app:
+```bash
+./scripts/install-and-run.sh
+```
 
-- Real AI Enhancement: ReMastera does not fake AI features. If a neural model is not active on your Mac, the upscale process is clearly labeled as "Standard Upscale" rather than "AI Upscale."
-- Dolby Vision / Dolby Atmos: True Dolby Vision and Dolby Atmos creation requires licensed tools. ReMastera provides "HDR10-compatible" container mapping and "spatial audio passthrough" instead. Advanced Dolby metadata injection hooks are provided for users who manually configure local licensed toolchains.
-- Voice Cloning and Dubbing: These options are structured as future plugin hooks. A warning consent banner is shown to users before executing these tools to respect copyright boundaries.
+---
 
-## Known Limitations
+## 5. Architecture & Layout Routing
 
-- Processing Speed: Performance is highly dependent on your hardware profile. Apple Silicon Macs with active hardware decoders deliver significantly faster render times.
-- Sandboxing: Standard sandboxing restrictions require explicit user permission to read or write files outside default system movie directories.
-
-## Visual Design Presentation
-
-### Application Layout
-
-A placeholder path for screenshots is set below:
-- Design/screenshots/dashboard_mockup.png
-
-### Processing Animation
-
-A placeholder path for demo GIFs is set below:
-- Design/demo/render_progress.gif
+The workspace is organized with strict Swift Package Manager dependency separation:
+- `Sources/ReMastera/` — Main SwiftUI application and views (`MainAppView`, `RemyMascot`, `SidebarView`, `DashboardView`).
+- `Sources/ReMasteraCore/` — Core processing logic, preset definitions, tag sanitizers, size estimators, and pipeline stages.
+- `Sources/ReMasteraCLI/` — Immersive Terminal User Interface (TUI).
+- `Sources/ReMasteraTests/` — Assertion executable suite verifying system actions out-of-the-box.

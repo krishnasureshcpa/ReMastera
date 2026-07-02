@@ -6,17 +6,16 @@ import SwiftUI
 
 public enum ReMasteraDesign {
     
-    // MARK: - Gamified Brand Colors
-    // Soft but vibrant, high-end look
-    static let brand = Color(red: 0.35, green: 0.80, blue: 0.98)       // Friendly Sky Blue
-    static let brandDeep = Color(red: 0.11, green: 0.63, blue: 0.87)   // Deep Sky Blue
-    static let primary = Color(red: 0.35, green: 0.80, blue: 0.40)     // Duolingo-style Green
-    static let primaryDeep = Color(red: 0.25, green: 0.65, blue: 0.30) // Darker Green
+    // MARK: - Swiss Typographic Stark Accents
+    static let brand = Color(red: 0.90, green: 0.10, blue: 0.15)       // Stark Crimson Red
+    static let brandDeep = Color(red: 0.70, green: 0.05, blue: 0.10)   // Deep Crimson Red
+    static let primary = Color(nsColor: .labelColor)                   // Stark Monochrome Black/White
+    static let primaryDeep = Color(nsColor: .secondaryLabelColor)
     
-    // MARK: - Neutrals (Adaptive for Light/Dark Mode)
+    // MARK: - Stark Neutrals (Neumorphic Baseline)
     static let background = Color(nsColor: .windowBackgroundColor)
-    static let surface = Color(nsColor: .controlBackgroundColor)
-    static let surfaceElevated = Color(nsColor: .textBackgroundColor)
+    static let surface = Color(nsColor: .windowBackgroundColor)        // Matches background for neumorphic blending
+    static let surfaceElevated = Color(nsColor: .controlBackgroundColor)
     
     // MARK: - Text
     static let heading = Color(nsColor: .labelColor)
@@ -25,13 +24,13 @@ public enum ReMasteraDesign {
     static let fgDisabled = Color(nsColor: .quaternaryLabelColor)
     
     // MARK: - Status
-    static let success = Color.green
-    static let warning = Color.orange
-    static let error = Color.red
+    static let success = Color(red: 0.15, green: 0.68, blue: 0.37)
+    static let warning = Color(red: 0.95, green: 0.61, blue: 0.07)
+    static let error = Color(red: 0.90, green: 0.10, blue: 0.15)
     
     // MARK: - Borders & Shadows
     static let borderSubtle = Color(nsColor: .separatorColor)
-    static let shadowColor = Color.black.opacity(0.1)
+    static let shadowColor = Color.black.opacity(0.12)
     
     // MARK: - Spacing (8px base grid)
     static let space4: CGFloat = 4
@@ -45,53 +44,53 @@ public enum ReMasteraDesign {
     static let space64: CGFloat = 64
     
     // MARK: - Radius
-    static let radiusSm: CGFloat = 8
-    static let radiusBase: CGFloat = 16
-    static let radiusLg: CGFloat = 24
+    static let radiusSm: CGFloat = 6
+    static let radiusBase: CGFloat = 12
+    static let radiusLg: CGFloat = 18
     static let radiusFull: CGFloat = 9999
     
-    // MARK: - Emil Kowalski Fluid Springs
-    static let springBouncy = Animation.spring(response: 0.35, dampingFraction: 0.55, blendDuration: 0)
-    static let springSmooth = Animation.spring(response: 0.4, dampingFraction: 0.8, blendDuration: 0)
+    // MARK: - Swiss Motion (Fluid, Damped Springs)
+    static let springBouncy = Animation.spring(response: 0.30, dampingFraction: 0.60, blendDuration: 0)
+    static let springSmooth = Animation.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0)
 }
 
 // MARK: - Typography Scale
 
-/// Friendly, rounded typography scale to match gamified UI.
+/// Swiss Typographic scale utilizing Bebas Neue (headers) and DM Sans/DM Mono (body/code)
 public enum ReMasteraType {
     
     static func display(_ size: CGFloat = 48) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
+        .custom("Bebas Neue", size: size).bold()
     }
     
     static func heading(_ size: CGFloat = 28) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
+        .custom("Bebas Neue", size: size)
     }
     
     static func subheading(_ size: CGFloat = 20) -> Font {
-        .system(size: size, weight: .semibold, design: .rounded)
+        .custom("DM Sans", size: size).weight(.semibold)
     }
     
     static func body(_ size: CGFloat = 15) -> Font {
-        .system(size: size, weight: .regular, design: .rounded)
+        .custom("DM Sans", size: size).weight(.regular)
     }
     
     static func label(_ size: CGFloat = 13) -> Font {
-        .system(size: size, weight: .semibold, design: .rounded)
+        .custom("DM Sans", size: size).weight(.semibold)
     }
     
     static func caption(_ size: CGFloat = 11) -> Font {
-        .system(size: size, weight: .medium, design: .rounded)
+        .custom("DM Sans", size: size).weight(.medium)
     }
     
     static func code(_ size: CGFloat = 13) -> Font {
-        .system(size: size, weight: .medium, design: .monospaced)
+        .custom("DM Mono", size: size)
     }
 }
 
 // MARK: - Reusable View Modifiers
 
-/// Bouncy gamified card modifier
+/// Selective Neumorphic Modifier utilizing double shadows (ambient occlusion + light source extrusions)
 struct ReMasteraCard: ViewModifier {
     var interactive: Bool = false
     @State private var isPressed = false
@@ -99,12 +98,25 @@ struct ReMasteraCard: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .background(ReMasteraDesign.surface)
-            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous))
-            .shadow(color: ReMasteraDesign.shadowColor, radius: isHovered ? 12 : 4, y: isHovered ? 6 : 2)
-            .scaleEffect(isPressed ? 0.95 : 1.0)
-            .animation(ReMasteraDesign.springBouncy, value: isHovered)
-            .animation(ReMasteraDesign.springBouncy, value: isPressed)
+            .background(
+                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous)
+                    .fill(ReMasteraDesign.surface)
+            )
+            .shadow(
+                color: Color.black.opacity(isPressed ? 0.06 : (isHovered ? 0.16 : 0.12)),
+                radius: isPressed ? 2 : (isHovered ? 8 : 5),
+                x: isPressed ? 1 : (isHovered ? 5 : 3),
+                y: isPressed ? 1 : (isHovered ? 5 : 3)
+            )
+            .shadow(
+                color: Color.white.opacity(isPressed ? 0.3 : (isHovered ? 0.9 : 0.75)),
+                radius: isPressed ? 2 : (isHovered ? 8 : 5),
+                x: isPressed ? -1 : (isHovered ? -5 : -3),
+                y: isPressed ? -1 : (isHovered ? -5 : -3)
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .animation(ReMasteraDesign.springSmooth, value: isHovered)
+            .animation(ReMasteraDesign.springSmooth, value: isPressed)
             .onHover { hovering in
                 if interactive { isHovered = hovering }
             }
