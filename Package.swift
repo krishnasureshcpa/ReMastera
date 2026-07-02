@@ -15,7 +15,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
         .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.12.0"),
-        .package(url: "https://github.com/rive-app/rive-ios", from: "6.0.0")
+        .package(url: "https://github.com/rive-app/rive-ios", from: "6.0.0"),
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.0.0"),
+        .package(url: "https://github.com/airbnb/lottie-ios.git", exact: "4.3.0")
     ],
     targets: [
         .target(
@@ -25,7 +27,9 @@ let package = Package(
                 .product(name: "MLXRandom", package: "mlx-swift"),
                 .product(name: "MLXNN", package: "mlx-swift"),
                 .product(name: "MLXOptimizers", package: "mlx-swift"),
-                .product(name: "RiveRuntime", package: "rive-ios")
+                .product(name: "RiveRuntime", package: "rive-ios"),
+                .product(name: "Sparkle", package: "Sparkle"),
+                .product(name: "Lottie", package: "lottie-ios")
             ],
             path: "Sources/ReMastera"
         ),
@@ -45,7 +49,7 @@ let package = Package(
         .executableTarget(
             name: "ReMasteraTests",
             dependencies: ["ReMasteraCore"],
-            path: "Tests/ReMasteraTests"
+            path: "Sources/ReMasteraTests"
         )
     ]
 )
