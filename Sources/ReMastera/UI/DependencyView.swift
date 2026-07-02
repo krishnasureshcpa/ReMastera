@@ -7,12 +7,10 @@ public struct DependencyView: View {
         VStack(spacing: 0) {
             // Friendly Header
             HStack {
-                VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("System Dependencies")
-                        .font(ReMasteraType.heading(28))
-                        .foregroundStyle(ReMasteraDesign.heading)
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
+                    SwissMixedHeading(prefix: "[03]", title: "SYSTEM DEPENDENCIES", suffix: "ENVIRONMENT STATUS")
                     Text("Verify required command-line binaries and ML models.")
-                        .font(ReMasteraType.body(15))
+                        .font(ReMasteraType.body())
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()

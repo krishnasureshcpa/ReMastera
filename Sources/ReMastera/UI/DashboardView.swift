@@ -21,10 +21,8 @@ public struct DashboardView: View {
         VStack(spacing: ReMasteraDesign.space24) {
             // Header
             HStack {
-                VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("Ready to Remaster")
-                        .font(ReMasteraType.heading())
-                        .foregroundStyle(ReMasteraDesign.heading)
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
+                    SwissMixedHeading(prefix: "[01]", title: "READY TO REMASTER", suffix: "v1.0.0")
                     Text("Drag a video into the zone below or choose your enhancements.")
                         .font(ReMasteraType.body())
                         .foregroundStyle(ReMasteraDesign.body)

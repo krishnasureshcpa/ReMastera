@@ -13,12 +13,10 @@ public struct QueueView: View {
         VStack(spacing: 0) {
             // Friendly Header
             HStack {
-                VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("Render Queue")
-                        .font(ReMasteraType.heading(28))
-                        .foregroundStyle(ReMasteraDesign.heading)
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
+                    SwissMixedHeading(prefix: "[02]", title: "RENDER QUEUE", suffix: "ACTIVE STREAMS")
                     Text("Monitor active streams, intercept outputs, and debug failures.")
-                        .font(ReMasteraType.body(15))
+                        .font(ReMasteraType.body())
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()

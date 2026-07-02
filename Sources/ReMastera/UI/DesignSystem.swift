@@ -6,31 +6,31 @@ import SwiftUI
 
 public enum ReMasteraDesign {
     
-    // MARK: - Swiss Typographic Stark Accents
-    static let brand = Color(red: 0.90, green: 0.10, blue: 0.15)       // Stark Crimson Red
-    static let brandDeep = Color(red: 0.70, green: 0.05, blue: 0.10)   // Deep Crimson Red
-    static let primary = Color(nsColor: .labelColor)                   // Stark Monochrome Black/White
-    static let primaryDeep = Color(nsColor: .secondaryLabelColor)
+    // MARK: - Matrix Accent Tones (#389DC6)
+    static let brand = Color(red: 0.22, green: 0.62, blue: 0.78)       // Matrix Blue (#389DC6)
+    static let brandDeep = Color(red: 0.16, green: 0.48, blue: 0.61)   // Dark Accent Blue (#2A7A9B)
+    static let primary = Color(red: 0.22, green: 0.62, blue: 0.78)
+    static let primaryDeep = Color(red: 0.53, green: 0.77, blue: 0.88) // Light Accent Blue (#88C5E0)
     
-    // MARK: - Stark Neutrals (Neumorphic Baseline)
-    static let background = Color(nsColor: .windowBackgroundColor)
-    static let surface = Color(nsColor: .windowBackgroundColor)        // Matches background for neumorphic blending
-    static let surfaceElevated = Color(nsColor: .controlBackgroundColor)
+    // MARK: - Deep Terminal Backdrops (#020804)
+    static let background = Color(red: 0.01, green: 0.03, blue: 0.02)
+    static let surface = Color(red: 0.01, green: 0.03, blue: 0.02)     // Fully flat backdrop
+    static let surfaceElevated = Color(red: 0.05, green: 0.12, blue: 0.15)
     
-    // MARK: - Text
-    static let heading = Color(nsColor: .labelColor)
-    static let body = Color(nsColor: .secondaryLabelColor)
-    static let bodySubtle = Color(nsColor: .tertiaryLabelColor)
-    static let fgDisabled = Color(nsColor: .quaternaryLabelColor)
+    // MARK: - Text (Matrix Blue Shades)
+    static let heading = Color(red: 0.53, green: 0.77, blue: 0.88)
+    static let body = Color(red: 0.22, green: 0.62, blue: 0.78)
+    static let bodySubtle = Color(red: 0.16, green: 0.48, blue: 0.61)
+    static let fgDisabled = Color(red: 0.08, green: 0.24, blue: 0.31)
     
     // MARK: - Status
-    static let success = Color(red: 0.15, green: 0.68, blue: 0.37)
-    static let warning = Color(red: 0.95, green: 0.61, blue: 0.07)
-    static let error = Color(red: 0.90, green: 0.10, blue: 0.15)
+    static let success = Color(red: 0.00, green: 0.60, blue: 0.42)     // Matrix green
+    static let warning = Color(red: 0.98, green: 0.57, blue: 0.15)
+    static let error = Color(red: 0.78, green: 0.00, blue: 0.21)
     
-    // MARK: - Borders & Shadows
-    static let borderSubtle = Color(nsColor: .separatorColor)
-    static let shadowColor = Color.black.opacity(0.12)
+    // MARK: - Borders & Shadows (Sharp 1px border defaults)
+    static let borderSubtle = Color(red: 0.16, green: 0.48, blue: 0.61).opacity(0.4)
+    static let shadowColor = Color(red: 0.22, green: 0.62, blue: 0.78).opacity(0.15)
     
     // MARK: - Spacing (8px base grid)
     static let space4: CGFloat = 4
@@ -43,15 +43,15 @@ public enum ReMasteraDesign {
     static let space48: CGFloat = 48
     static let space64: CGFloat = 64
     
-    // MARK: - Radius
-    static let radiusSm: CGFloat = 6
-    static let radiusBase: CGFloat = 12
-    static let radiusLg: CGFloat = 18
+    // MARK: - Radius (Sharp 4px default)
+    static let radiusSm: CGFloat = 2
+    static let radiusBase: CGFloat = 4
+    static let radiusLg: CGFloat = 4
     static let radiusFull: CGFloat = 9999
     
-    // MARK: - Swiss Motion (Fluid, Damped Springs)
-    static let springBouncy = Animation.spring(response: 0.30, dampingFraction: 0.60, blendDuration: 0)
-    static let springSmooth = Animation.spring(response: 0.35, dampingFraction: 0.85, blendDuration: 0)
+    // MARK: - Snappy Terminal Motion
+    static let springBouncy = Animation.spring(response: 0.20, dampingFraction: 0.70, blendDuration: 0)
+    static let springSmooth = Animation.spring(response: 0.25, dampingFraction: 0.85, blendDuration: 0)
 }
 
 // MARK: - Typography Scale
@@ -59,38 +59,73 @@ public enum ReMasteraDesign {
 /// Swiss Typographic scale utilizing Bebas Neue (headers) and DM Sans/DM Mono (body/code)
 public enum ReMasteraType {
     
-    static func display(_ size: CGFloat = 48) -> Font {
+    static func display(_ size: CGFloat = 84) -> Font {
         .custom("Bebas Neue", size: size).bold()
     }
     
-    static func heading(_ size: CGFloat = 28) -> Font {
+    static func heading(_ size: CGFloat = 48) -> Font {
         .custom("Bebas Neue", size: size)
     }
     
-    static func subheading(_ size: CGFloat = 20) -> Font {
+    static func subheading(_ size: CGFloat = 28) -> Font {
         .custom("DM Sans", size: size).weight(.semibold)
     }
     
-    static func body(_ size: CGFloat = 15) -> Font {
-        .custom("DM Sans", size: size).weight(.regular)
-    }
-    
-    static func label(_ size: CGFloat = 13) -> Font {
-        .custom("DM Sans", size: size).weight(.semibold)
-    }
-    
-    static func caption(_ size: CGFloat = 11) -> Font {
-        .custom("DM Sans", size: size).weight(.medium)
-    }
-    
-    static func code(_ size: CGFloat = 13) -> Font {
+    static func body(_ size: CGFloat = 20) -> Font {
         .custom("DM Mono", size: size)
+    }
+    
+    static func label(_ size: CGFloat = 18) -> Font {
+        .custom("DM Mono", size: size).weight(.semibold)
+    }
+    
+    static func caption(_ size: CGFloat = 16) -> Font {
+        .custom("DM Mono", size: size).weight(.medium)
+    }
+    
+    static func code(_ size: CGFloat = 18) -> Font {
+        .custom("DM Mono", size: size)
+    }
+}
+
+// MARK: - Mixed Typography Components
+
+/// Stark Swiss International Mixed Typography Heading view
+public struct SwissMixedHeading: View {
+    public let prefix: String
+    public let title: String
+    public let suffix: String?
+    
+    public init(prefix: String, title: String, suffix: String? = nil) {
+        self.prefix = prefix
+        self.title = title
+        self.suffix = suffix
+    }
+    
+    public var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: ReMasteraDesign.space12) {
+            Text(prefix)
+                .font(ReMasteraType.code(18))
+                .foregroundStyle(ReMasteraDesign.brand)
+                .bold()
+            
+            Text(title)
+                .font(ReMasteraType.heading(48))
+                .foregroundStyle(ReMasteraDesign.heading)
+            
+            if let suffix = suffix {
+                Text(suffix)
+                    .font(ReMasteraType.caption(15))
+                    .foregroundStyle(ReMasteraDesign.bodySubtle)
+                    .bold()
+            }
+        }
     }
 }
 
 // MARK: - Reusable View Modifiers
 
-/// Selective Neumorphic Modifier utilizing double shadows (ambient occlusion + light source extrusions)
+/// Sharp-edged Terminal outline glow card
 struct ReMasteraCard: ViewModifier {
     var interactive: Bool = false
     @State private var isPressed = false
@@ -98,23 +133,18 @@ struct ReMasteraCard: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .background(
+            .background(ReMasteraDesign.surface)
+            .overlay(
                 RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous)
-                    .fill(ReMasteraDesign.surface)
+                    .stroke(isHovered ? ReMasteraDesign.primary : ReMasteraDesign.borderSubtle, lineWidth: 1)
             )
             .shadow(
-                color: Color.black.opacity(isPressed ? 0.06 : (isHovered ? 0.16 : 0.12)),
-                radius: isPressed ? 2 : (isHovered ? 8 : 5),
-                x: isPressed ? 1 : (isHovered ? 5 : 3),
-                y: isPressed ? 1 : (isHovered ? 5 : 3)
+                color: ReMasteraDesign.brand.opacity(isHovered ? 0.25 : 0.0),
+                radius: isHovered ? 8 : 0,
+                x: 0,
+                y: 0
             )
-            .shadow(
-                color: Color.white.opacity(isPressed ? 0.3 : (isHovered ? 0.9 : 0.75)),
-                radius: isPressed ? 2 : (isHovered ? 8 : 5),
-                x: isPressed ? -1 : (isHovered ? -5 : -3),
-                y: isPressed ? -1 : (isHovered ? -5 : -3)
-            )
-            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .scaleEffect(isPressed ? 0.99 : 1.0)
             .animation(ReMasteraDesign.springSmooth, value: isHovered)
             .animation(ReMasteraDesign.springSmooth, value: isPressed)
             .onHover { hovering in
@@ -128,13 +158,22 @@ struct ReMasteraCard: ViewModifier {
     }
 }
 
-/// A playful section divider
+/// A dashed section divider
 struct SectionDivider: View {
     var body: some View {
-        Rectangle()
-            .fill(ReMasteraDesign.borderSubtle)
-            .frame(height: 2)
-            .clipShape(Capsule())
+        Line()
+            .stroke(style: StrokeStyle(lineWidth: 1, dash: [4]))
+            .foregroundStyle(ReMasteraDesign.borderSubtle)
+            .frame(height: 1)
+    }
+}
+
+struct Line: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        return path
     }
 }
 

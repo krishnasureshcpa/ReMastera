@@ -8,12 +8,10 @@ public struct PrivacyView: View {
         VStack(spacing: 0) {
             // Friendly Header
             HStack {
-                VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("Offline Sovereignty")
-                        .font(ReMasteraType.heading(28))
-                        .foregroundStyle(ReMasteraDesign.heading)
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
+                    SwissMixedHeading(prefix: "[05]", title: "OFFLINE SOVEREIGNTY", suffix: "PRIVACY DEED")
                     Text("ReMastera guarantees absolute privacy through strict offline isolation.")
-                        .font(ReMasteraType.body(15))
+                        .font(ReMasteraType.body())
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
