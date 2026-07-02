@@ -6,14 +6,14 @@ public struct PrivacyView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Friendly Header
             HStack {
                 VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("OFFLINE SOVEREIGNTY")
-                        .font(ReMasteraType.heading(24))
+                    Text("Offline Sovereignty")
+                        .font(ReMasteraType.heading(28))
                         .foregroundStyle(ReMasteraDesign.heading)
                     Text("ReMastera guarantees absolute privacy through strict offline isolation.")
-                        .font(ReMasteraType.body(14))
+                        .font(ReMasteraType.body(15))
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
@@ -24,66 +24,61 @@ public struct PrivacyView: View {
             
             ScrollView {
                 VStack(spacing: ReMasteraDesign.space48) {
-                    // Guarantees
+                    // Gamified Guarantees
                     VStack(spacing: ReMasteraDesign.space16) {
                         PrivacyRow(
                             icon: "shield.checkered",
-                            title: "ZERO CLOUD UPLOADS",
+                            iconColor: ReMasteraDesign.success,
+                            title: "Zero Cloud Uploads",
                             description: "Your media files never leave this machine. All operations are processed locally on your Apple Silicon hardware."
                         )
                         PrivacyRow(
                             icon: "wifi.slash",
-                            title: "NO TELEMETRY",
+                            iconColor: ReMasteraDesign.brandDeep,
+                            title: "No Telemetry",
                             description: "ReMastera does not gather usage analytics, logs, crash uploads, or user statistics. Your data is your own."
                         )
                         PrivacyRow(
                             icon: "folder.badge.gearshape",
-                            title: "NO SILENT DOWNLOADS",
+                            iconColor: ReMasteraDesign.warning,
+                            title: "No Silent Downloads",
                             description: "The application will never download models or dependencies in the background without explicit terminal authorization."
                         )
                     }
                     
                     // Local Storage Info
                     VStack(alignment: .leading, spacing: ReMasteraDesign.space16) {
-                        Text("LOCAL DIRECTORY STRUCTURE")
-                            .font(ReMasteraType.label(12))
-                            .tracking(2)
-                            .foregroundStyle(ReMasteraDesign.brand)
+                        Text("Local Directory Structure")
+                            .font(ReMasteraType.label(14))
+                            .foregroundStyle(ReMasteraDesign.brandDeep)
                         
-                        VStack(spacing: 0) {
+                        VStack(spacing: ReMasteraDesign.space12) {
                             DirectoryInfoRow(
                                 title: "Model Directory",
                                 description: "Neural network weights (Whisper, Real-ESRGAN)",
                                 path: "~/Library/Application Support/ReMastera/Models"
                             )
-                            Divider().background(ReMasteraDesign.borderSubtle)
                             DirectoryInfoRow(
                                 title: "Log Directory",
                                 description: "Local execution logs (ffmpeg transcripts)",
                                 path: "~/Library/Logs/ReMastera"
                             )
                         }
-                        .background(ReMasteraDesign.surfaceElevated)
-                        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                        )
                     }
                     
                     HStack {
                         Button(action: openLogsFolder) {
                             HStack(spacing: ReMasteraDesign.space8) {
-                                Image(systemName: "terminal")
-                                Text("REVEAL LOGS IN FINDER")
-                                    .tracking(1)
+                                Image(systemName: "folder.fill")
+                                Text("Reveal Logs in Finder")
                             }
-                            .font(ReMasteraType.label(13))
-                            .foregroundStyle(ReMasteraDesign.black)
+                            .font(ReMasteraType.label(14))
+                            .foregroundStyle(.white)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 12)
                             .background(ReMasteraDesign.brand)
-                            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+                            .clipShape(Capsule())
+                            .shadow(color: ReMasteraDesign.brand.opacity(0.3), radius: 8, y: 4)
                         }
                         .buttonStyle(.plain)
                         Spacer()
@@ -92,6 +87,7 @@ public struct PrivacyView: View {
                 .padding(ReMasteraDesign.space32)
             }
         }
+        .background(ReMasteraDesign.background)
     }
     
     private func openLogsFolder() {
@@ -106,20 +102,25 @@ public struct PrivacyView: View {
 
 struct PrivacyRow: View {
     let icon: String
+    let iconColor: Color
     let title: String
     let description: String
     
     var body: some View {
         HStack(alignment: .top, spacing: ReMasteraDesign.space24) {
-            Image(systemName: icon)
-                .font(.system(size: 32, weight: .light))
-                .foregroundStyle(ReMasteraDesign.success)
-                .frame(width: 40)
+            ZStack {
+                Circle()
+                    .fill(iconColor.opacity(0.15))
+                    .frame(width: 56, height: 56)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(iconColor)
+            }
             
             VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
                 Text(title)
-                    .font(ReMasteraType.label(16))
-                    .tracking(2)
+                    .font(ReMasteraType.label(18))
                     .foregroundStyle(ReMasteraDesign.heading)
                 Text(description)
                     .font(ReMasteraType.body(14))
@@ -129,12 +130,7 @@ struct PrivacyRow: View {
             Spacer()
         }
         .padding(ReMasteraDesign.space24)
-        .background(ReMasteraDesign.surfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-        .overlay(
-            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-        )
+        .remasteraCard(interactive: false)
     }
 }
 
@@ -147,25 +143,22 @@ struct DirectoryInfoRow: View {
         VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
             HStack {
                 Text(title)
-                    .font(ReMasteraType.label(14))
+                    .font(ReMasteraType.label(16))
                     .foregroundStyle(ReMasteraDesign.heading)
                 Spacer()
                 Text(description)
                     .font(ReMasteraType.caption(12))
-                    .foregroundStyle(ReMasteraDesign.fgDisabled)
+                    .foregroundStyle(ReMasteraDesign.bodySubtle)
             }
             Text(path)
-                .font(ReMasteraType.caption(12))
+                .font(ReMasteraType.code(12))
                 .foregroundStyle(ReMasteraDesign.brand)
-                .padding(8)
+                .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(ReMasteraDesign.black)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                )
+                .background(ReMasteraDesign.brand.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .padding(ReMasteraDesign.space16)
+        .remasteraCard(interactive: false)
     }
 }

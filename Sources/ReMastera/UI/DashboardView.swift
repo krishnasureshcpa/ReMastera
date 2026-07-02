@@ -18,134 +18,122 @@ public struct DashboardView: View {
     }
     
     public var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: ReMasteraDesign.space24) {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("DASHBOARD")
-                        .font(ReMasteraType.heading(24))
+                    Text("Ready to Remaster")
+                        .font(ReMasteraType.heading())
                         .foregroundStyle(ReMasteraDesign.heading)
-                    Text("Drop media files here to begin processing sequence.")
-                        .font(ReMasteraType.body(14))
+                    Text("Drag a video into the zone below or choose your enhancements.")
+                        .font(ReMasteraType.body())
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
+                
+                // Gamified "Start" button placeholder if we had a file
+                Button(action: {}) {
+                    HStack {
+                        Image(systemName: "play.fill")
+                        Text("Process Queue")
+                    }
+                    .font(ReMasteraType.label(15))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(ReMasteraDesign.primary)
+                    .clipShape(Capsule())
+                    .shadow(color: ReMasteraDesign.primary.opacity(0.3), radius: 8, y: 4)
+                }
+                .buttonStyle(.plain)
             }
-            .padding(ReMasteraDesign.space32)
+            .padding(.top, ReMasteraDesign.space32)
+            .padding(.horizontal, ReMasteraDesign.space32)
             
-            SectionDivider()
-            
-            HStack(spacing: 0) {
-                // Left: Drop Zone
-                VStack {
-                    ZStack {
-                        // Drop Zone Background
-                        RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                            .fill(isTargeted ? ReMasteraDesign.brandSofter : ReMasteraDesign.surfaceElevated)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                                    .strokeBorder(
-                                        isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle,
-                                        style: StrokeStyle(lineWidth: isTargeted ? 2 : 1, dash: isTargeted ? [10] : [])
-                                    )
-                            )
+            HStack(spacing: ReMasteraDesign.space24) {
+                // Left: Gamified Drop Zone
+                ZStack {
+                    RoundedRectangle(cornerRadius: ReMasteraDesign.radiusLg, style: .continuous)
+                        .fill(isTargeted ? ReMasteraDesign.brand.opacity(0.1) : ReMasteraDesign.surface)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusLg, style: .continuous)
+                                .strokeBorder(
+                                    isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle,
+                                    style: StrokeStyle(lineWidth: isTargeted ? 3 : 2, dash: isTargeted ? [15] : [])
+                                )
+                        )
+                    
+                    VStack(spacing: ReMasteraDesign.space16) {
+                        Image(systemName: isTargeted ? "arrow.down.circle.fill" : "plus.circle.fill")
+                            .font(.system(size: 64))
+                            .foregroundStyle(isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle)
+                            .scaleEffect(isTargeted ? 1.1 : 1.0)
+                            .animation(ReMasteraDesign.springBouncy, value: isTargeted)
                         
-                        VStack(spacing: ReMasteraDesign.space24) {
-                            Image(systemName: "plus.square.dashed")
-                                .font(.system(size: 64, weight: .ultraLight))
-                                .foregroundStyle(isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.brandSoft)
-                            
-                            VStack(spacing: ReMasteraDesign.space8) {
-                                Text("INITIALIZE BATCH")
-                                    .font(ReMasteraType.label(16))
-                                    .tracking(2)
-                                    .foregroundStyle(isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.heading)
-                                Text("Drag & drop .mov, .mp4, or .mkv files")
-                                    .font(ReMasteraType.caption(12))
-                                    .foregroundStyle(ReMasteraDesign.fgDisabled)
-                            }
+                        VStack(spacing: ReMasteraDesign.space4) {
+                            Text("Drop video files here")
+                                .font(ReMasteraType.subheading())
+                                .foregroundStyle(ReMasteraDesign.heading)
+                            Text("MP4, MOV, or MKV")
+                                .font(ReMasteraType.body())
+                                .foregroundStyle(ReMasteraDesign.body)
                         }
                     }
-                    .padding(ReMasteraDesign.space32)
-                    .onDrop(of: [UTType.movie, UTType.video], isTargeted: $isTargeted) { providers in
-                        handleDrop(providers: providers)
-                    }
+                }
+                .remasteraCard(interactive: true)
+                .onDrop(of: [UTType.movie, UTType.video], isTargeted: $isTargeted) { providers in
+                    handleDrop(providers: providers)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
-                // Vertical Divider
-                Rectangle()
-                    .fill(ReMasteraDesign.borderSubtle)
-                    .frame(width: 1)
                 
                 // Right: Configuration Panel
                 VStack(alignment: .leading, spacing: ReMasteraDesign.space24) {
                     ScrollView {
                         VStack(alignment: .leading, spacing: ReMasteraDesign.space24) {
-                            Text("TARGET PRESET")
-                                .font(ReMasteraType.label(12))
-                                .tracking(2)
-                                .foregroundStyle(ReMasteraDesign.brand)
                             
-                            VStack(spacing: ReMasteraDesign.space12) {
+                            VStack(alignment: .leading, spacing: ReMasteraDesign.space12) {
+                                Text("Quality Preset")
+                                    .font(ReMasteraType.label())
+                                    .foregroundStyle(ReMasteraDesign.heading)
+                                
                                 ForEach(Preset.allCases) { preset in
                                     PresetRow(
                                         preset: preset,
                                         isSelected: selectedPreset == preset,
-                                        action: { selectedPreset = preset }
+                                        action: {
+                                            withAnimation(ReMasteraDesign.springBouncy) {
+                                                selectedPreset = preset
+                                            }
+                                        }
                                     )
                                 }
                             }
                             
-                            Text("ENHANCEMENTS")
-                                .font(ReMasteraType.label(12))
-                                .tracking(2)
-                                .foregroundStyle(ReMasteraDesign.brand)
-                                .padding(.top, ReMasteraDesign.space16)
+                            SectionDivider()
                             
-                            VStack(spacing: 0) {
-                                DashboardToggle(title: "Standard Denoise (hqdn3d)", isOn: $isDenoiseEnabled)
-                                Divider().background(ReMasteraDesign.borderSubtle)
-                                DashboardToggle(title: "Kodak Film Look (5247)", isOn: $isFilmLookEnabled)
-                                Divider().background(ReMasteraDesign.borderSubtle)
-                                DashboardToggle(title: "Subtitle Extraction", isOn: $isSubtitleEnabled)
-                                Divider().background(ReMasteraDesign.borderSubtle)
-                                DashboardToggle(title: "Neural Upscale (RealESRGAN)", isOn: $isUpscaleEnabled)
-                                Divider().background(ReMasteraDesign.borderSubtle)
-                                DashboardToggle(title: "HDR10 Tagging", isOn: $isHdr10Enabled)
+                            VStack(alignment: .leading, spacing: ReMasteraDesign.space16) {
+                                Text("Enhancements")
+                                    .font(ReMasteraType.label())
+                                    .foregroundStyle(ReMasteraDesign.heading)
+                                
+                                VStack(spacing: ReMasteraDesign.space12) {
+                                    EnhancementToggle(title: "AI Denoise", icon: "sparkles", isOn: $isDenoiseEnabled)
+                                    EnhancementToggle(title: "Kodak Film Look", icon: "film", isOn: $isFilmLookEnabled)
+                                    EnhancementToggle(title: "Extract Subtitles", icon: "text.bubble", isOn: $isSubtitleEnabled)
+                                    EnhancementToggle(title: "Neural Upscale", icon: "arrow.up.left.and.arrow.down.right", isOn: $isUpscaleEnabled)
+                                    EnhancementToggle(title: "HDR10 Tagging", icon: "sun.max.fill", isOn: $isHdr10Enabled)
+                                }
                             }
-                            .background(ReMasteraDesign.surfaceElevated)
-                            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                                    .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                            )
                         }
+                        .padding(ReMasteraDesign.space4)
                     }
-                    
-                    VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
-                        Text("SYSTEM READY")
-                            .font(ReMasteraType.caption(10))
-                            .tracking(2)
-                            .foregroundStyle(ReMasteraDesign.success)
-                        Text("Awaiting input stream...")
-                            .font(ReMasteraType.body(12))
-                            .foregroundStyle(ReMasteraDesign.body)
-                    }
-                    .padding(ReMasteraDesign.space16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(ReMasteraDesign.surfaceElevated)
-                    .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                            .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                    )
                 }
-                .padding(ReMasteraDesign.space32)
                 .frame(width: 320)
-                .background(ReMasteraDesign.surface)
             }
+            .padding(.horizontal, ReMasteraDesign.space32)
+            .padding(.bottom, ReMasteraDesign.space32)
         }
+        .background(ReMasteraDesign.background)
     }
     
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
@@ -207,22 +195,38 @@ public struct DashboardView: View {
     }
 }
 
-struct DashboardToggle: View {
+// MARK: - Gamified Toggles and Rows
+
+struct EnhancementToggle: View {
     let title: String
+    let icon: String
     @Binding var isOn: Bool
     
     var body: some View {
-        HStack {
+        HStack(spacing: ReMasteraDesign.space12) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(isOn ? ReMasteraDesign.brand : ReMasteraDesign.bodySubtle)
+                .frame(width: 24)
+            
             Text(title)
-                .font(ReMasteraType.label(12))
+                .font(ReMasteraType.body())
                 .foregroundStyle(ReMasteraDesign.heading)
+            
             Spacer()
+            
             Toggle("", isOn: $isOn)
                 .toggleStyle(.switch)
-                .tint(ReMasteraDesign.brand)
-                .controlSize(.small)
+                .tint(ReMasteraDesign.primary)
         }
         .padding(ReMasteraDesign.space12)
+        .background(ReMasteraDesign.surface)
+        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous)
+                .stroke(isOn ? ReMasteraDesign.brand.opacity(0.3) : ReMasteraDesign.borderSubtle, lineWidth: 1)
+        )
+        .animation(ReMasteraDesign.springBouncy, value: isOn)
     }
 }
 
@@ -232,47 +236,55 @@ struct PresetRow: View {
     let action: () -> Void
     
     @State private var isHovered = false
+    @State private var isPressed = false
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: ReMasteraDesign.space12) {
+            HStack(spacing: ReMasteraDesign.space16) {
+                // Radio button circle
                 ZStack {
                     Circle()
-                        .stroke(isSelected ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle, lineWidth: 1.5)
-                        .frame(width: 16, height: 16)
+                        .stroke(isSelected ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle, lineWidth: 2)
+                        .frame(width: 20, height: 20)
                     
                     if isSelected {
                         Circle()
                             .fill(ReMasteraDesign.brand)
-                            .frame(width: 8, height: 8)
-                            .shadow(color: ReMasteraDesign.brand.opacity(0.8), radius: 4)
+                            .frame(width: 10, height: 10)
                     }
                 }
                 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(preset.displayName)
-                        .font(ReMasteraType.label(14))
-                        .foregroundStyle(isSelected ? ReMasteraDesign.heading : ReMasteraDesign.body)
+                        .font(ReMasteraType.label())
+                        .foregroundStyle(isSelected ? ReMasteraDesign.brandDeep : ReMasteraDesign.heading)
                     Text(preset.description)
-                        .font(ReMasteraType.caption(11))
-                        .foregroundStyle(ReMasteraDesign.fgDisabled)
+                        .font(ReMasteraType.caption())
+                        .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
             }
-            .padding(ReMasteraDesign.space12)
+            .padding(ReMasteraDesign.space16)
             .background(
-                isSelected ? ReMasteraDesign.brandSofter :
-                (isHovered ? ReMasteraDesign.surfaceElevated : .clear)
+                isSelected ? ReMasteraDesign.brand.opacity(0.1) :
+                (isHovered ? ReMasteraDesign.surfaceElevated : ReMasteraDesign.surface)
             )
-            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                    .stroke(isSelected ? ReMasteraDesign.borderSubtle : .clear, lineWidth: 1)
+                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous)
+                    .stroke(isSelected ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle, lineWidth: isSelected ? 2 : 1)
             )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .animation(ReMasteraDesign.springBouncy, value: isSelected)
+            .animation(ReMasteraDesign.springBouncy, value: isHovered)
+            .animation(ReMasteraDesign.springBouncy, value: isPressed)
         }
         .buttonStyle(.plain)
-        .onHover { hovering in
-            withAnimation(.easeOut(duration: 0.15)) { isHovered = hovering }
-        }
+        .onHover { hovering in isHovered = hovering }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }

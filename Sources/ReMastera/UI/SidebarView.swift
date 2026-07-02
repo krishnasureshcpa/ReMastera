@@ -24,22 +24,11 @@ public enum NavigationTarget: String, CaseIterable, Identifiable {
     public var iconName: String {
         switch self {
         case .assistant: return "sparkles"
-        case .dashboard: return "square.grid.2x2"
-        case .queue: return "film.stack"
+        case .dashboard: return "square.grid.2x2.fill"
+        case .queue: return "film.stack.fill"
         case .dependencies: return "cpu"
-        case .privacy: return "lock.shield"
-        case .settings: return "gearshape"
-        }
-    }
-    
-    public var shortLabel: String {
-        switch self {
-        case .assistant: return "AST"
-        case .dashboard: return "DSH"
-        case .queue: return "QUE"
-        case .dependencies: return "DEP"
-        case .privacy: return "PRI"
-        case .settings: return "SET"
+        case .privacy: return "lock.shield.fill"
+        case .settings: return "gearshape.fill"
         }
     }
 }
@@ -47,6 +36,7 @@ public enum NavigationTarget: String, CaseIterable, Identifiable {
 public struct SidebarView: View {
     @Binding public var selection: NavigationTarget
     @State private var hoveredTarget: NavigationTarget?
+    @State private var pressedTarget: NavigationTarget?
     
     public init(selection: Binding<NavigationTarget>) {
         self._selection = selection
@@ -54,101 +44,105 @@ public struct SidebarView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Brand header
+            // Friendly Gamified Header
             VStack(spacing: ReMasteraDesign.space4) {
-                Text("Re")
-                    .font(ReMasteraType.display(28))
-                    .foregroundStyle(ReMasteraDesign.heading)
-                +
-                Text("Mastera")
-                    .font(ReMasteraType.display(28))
-                    .foregroundStyle(ReMasteraDesign.brand)
+                HStack(spacing: 0) {
+                    Text("Re")
+                        .font(ReMasteraType.display(24))
+                        .foregroundStyle(ReMasteraDesign.heading)
+                    Text("Mastera")
+                        .font(ReMasteraType.display(24))
+                        .foregroundStyle(ReMasteraDesign.brand)
+                }
             }
-            .padding(.vertical, ReMasteraDesign.space16)
+            .padding(.top, 24)
+            .padding(.bottom, 16)
             .frame(maxWidth: .infinity)
             
             SectionDivider()
+                .padding(.horizontal, ReMasteraDesign.space16)
             
             // Navigation items
-            VStack(spacing: ReMasteraDesign.space4) {
+            VStack(spacing: ReMasteraDesign.space8) {
                 ForEach(NavigationTarget.allCases) { target in
                     sidebarItem(target)
                 }
             }
-            .padding(.horizontal, ReMasteraDesign.space8)
-            .padding(.vertical, ReMasteraDesign.space12)
+            .padding(.horizontal, ReMasteraDesign.space12)
+            .padding(.vertical, ReMasteraDesign.space16)
             
             Spacer()
             
-            SectionDivider()
-            
             // Bottom status
             VStack(spacing: ReMasteraDesign.space8) {
-                HStack(spacing: ReMasteraDesign.space4) {
+                HStack(spacing: ReMasteraDesign.space8) {
                     Circle()
-                        .fill(ReMasteraDesign.success)
-                        .frame(width: 5, height: 5)
-                    Text("ALL LOCAL")
-                        .font(ReMasteraType.caption(9))
-                        .tracking(1.5)
-                        .foregroundStyle(ReMasteraDesign.fgDisabled)
+                        .fill(ReMasteraDesign.primary)
+                        .frame(width: 8, height: 8)
+                        .shadow(color: ReMasteraDesign.primary.opacity(0.4), radius: 4)
+                    Text("All Local")
+                        .font(ReMasteraType.label())
+                        .foregroundStyle(ReMasteraDesign.body)
                 }
-                
-                Text("v1.0.0")
-                    .font(ReMasteraType.caption(9))
-                    .foregroundStyle(ReMasteraDesign.fgDisabled)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(ReMasteraDesign.surfaceElevated)
+                .clipShape(Capsule())
             }
-            .padding(.vertical, ReMasteraDesign.space12)
+            .padding(.bottom, 24)
         }
-        .background(ReMasteraDesign.surface)
-        .frame(minWidth: 180, maxWidth: 200)
+        // Native Mac Translucency
+        .background(.ultraThinMaterial)
+        .frame(minWidth: 200, maxWidth: 220)
     }
     
     @ViewBuilder
     private func sidebarItem(_ target: NavigationTarget) -> some View {
         let isSelected = selection == target
         let isHovered = hoveredTarget == target
+        let isPressed = pressedTarget == target
         
         Button {
-            selection = target
+            withAnimation(ReMasteraDesign.springBouncy) {
+                selection = target
+            }
         } label: {
-            HStack(spacing: ReMasteraDesign.space8) {
-                // Icon with glow when selected
+            HStack(spacing: ReMasteraDesign.space12) {
                 Image(systemName: target.iconName)
-                    .font(.system(size: 14))
+                    .font(.system(size: 16, weight: isSelected ? .bold : .medium))
                     .foregroundStyle(isSelected ? ReMasteraDesign.brand : (isHovered ? ReMasteraDesign.heading : ReMasteraDesign.body))
-                    .shadow(color: isSelected ? ReMasteraDesign.brand.opacity(0.5) : .clear, radius: 4)
-                    .frame(width: 20)
+                    .frame(width: 24)
                 
                 Text(target.displayName)
-                    .font(ReMasteraType.label(12))
-                    .foregroundStyle(isSelected ? ReMasteraDesign.brand : (isHovered ? ReMasteraDesign.heading : ReMasteraDesign.body))
+                    .font(ReMasteraType.label(14))
+                    .foregroundStyle(isSelected ? ReMasteraDesign.heading : (isHovered ? ReMasteraDesign.heading : ReMasteraDesign.body))
                 
                 Spacer()
-                
-                // Terminal-style short label
-                if isSelected {
-                    Text(target.shortLabel)
-                        .font(ReMasteraType.caption(9))
-                        .tracking(1)
-                        .foregroundStyle(ReMasteraDesign.brandMedium)
-                }
             }
-            .padding(.horizontal, ReMasteraDesign.space8)
-            .padding(.vertical, ReMasteraDesign.space8)
+            .padding(.horizontal, ReMasteraDesign.space12)
+            .padding(.vertical, 10)
             .background(
-                isSelected ? ReMasteraDesign.brandSofter :
+                isSelected ? ReMasteraDesign.brand.opacity(0.15) :
                 (isHovered ? ReMasteraDesign.surfaceElevated : .clear)
             )
-            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                    .stroke(isSelected ? ReMasteraDesign.borderSubtle : .clear, lineWidth: 1)
+                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase, style: .continuous)
+                    .stroke(isSelected ? ReMasteraDesign.brand.opacity(0.3) : .clear, lineWidth: 1)
             )
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .animation(ReMasteraDesign.springBouncy, value: isSelected)
+            .animation(ReMasteraDesign.springBouncy, value: isHovered)
+            .animation(ReMasteraDesign.springBouncy, value: isPressed)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(.easeOut(duration: 0.1)) { hoveredTarget = hovering ? target : nil }
+            hoveredTarget = hovering ? target : nil
         }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in pressedTarget = target }
+                .onEnded { _ in pressedTarget = nil }
+        )
     }
 }

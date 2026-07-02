@@ -11,14 +11,14 @@ public struct QueueView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Friendly Header
             HStack {
                 VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("RENDER QUEUE")
-                        .font(ReMasteraType.heading(24))
+                    Text("Render Queue")
+                        .font(ReMasteraType.heading(28))
                         .foregroundStyle(ReMasteraDesign.heading)
                     Text("Monitor active streams, intercept outputs, and debug failures.")
-                        .font(ReMasteraType.body(14))
+                        .font(ReMasteraType.body(15))
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
@@ -29,18 +29,17 @@ public struct QueueView: View {
             
             if queueManager.jobs.isEmpty {
                 VStack(spacing: ReMasteraDesign.space24) {
-                    Image(systemName: "film.stack")
-                        .font(.system(size: 64, weight: .ultraLight))
+                    Image(systemName: "film.stack.fill")
+                        .font(.system(size: 64))
                         .foregroundStyle(ReMasteraDesign.borderSubtle)
                     
                     VStack(spacing: ReMasteraDesign.space8) {
-                        Text("QUEUE EMPTY")
-                            .font(ReMasteraType.label(16))
-                            .tracking(2)
+                        Text("Queue Empty")
+                            .font(ReMasteraType.heading(20))
                             .foregroundStyle(ReMasteraDesign.heading)
                         Text("No active processing streams.")
-                            .font(ReMasteraType.caption(12))
-                            .foregroundStyle(ReMasteraDesign.fgDisabled)
+                            .font(ReMasteraType.body(14))
+                            .foregroundStyle(ReMasteraDesign.body)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -48,18 +47,18 @@ public struct QueueView: View {
                 ScrollView {
                     LazyVStack(spacing: ReMasteraDesign.space16) {
                         ForEach(queueManager.jobs) { job in
-                            JobTerminalRow(
+                            JobCard(
                                 job: job,
-                                isExpanded: Binding(
-                                    get: { expandedJobLogs.contains(job.id) },
-                                    set: { expanded in
-                                        if expanded { expandedJobLogs.insert(job.id) }
-                                        else { expandedJobLogs.remove(job.id) }
+                                isExpanded: expandedJobLogs.contains(job.id),
+                                toggleExpand: {
+                                    withAnimation(ReMasteraDesign.springBouncy) {
+                                        if expandedJobLogs.contains(job.id) {
+                                            expandedJobLogs.remove(job.id)
+                                        } else {
+                                            expandedJobLogs.insert(job.id)
+                                        }
                                     }
-                                ),
-                                onRetry: { queueManager.retryJob(job: job) },
-                                onCancel: { queueManager.cancelJob(job: job) },
-                                onRemove: { queueManager.removeJob(job: job) }
+                                }
                             )
                         }
                     }
@@ -67,213 +66,136 @@ public struct QueueView: View {
                 }
             }
         }
+        .background(ReMasteraDesign.background)
     }
 }
 
-struct JobTerminalRow: View {
+struct JobCard: View {
     let job: Job
-    @Binding var isExpanded: Bool
-    let onRetry: () -> Void
-    let onCancel: () -> Void
-    let onRemove: () -> Void
+    let isExpanded: Bool
+    let toggleExpand: () -> Void
+    
+    @State private var isHovered = false
+    @State private var isPressed = false
     
     var body: some View {
         VStack(spacing: 0) {
-            // Top Bar
-            HStack(alignment: .center) {
-                // Status Indicator
-                Circle()
-                    .fill(statusColor(job.status))
-                    .frame(width: 8, height: 8)
-                    .shadow(color: statusColor(job.status).opacity(0.8), radius: 4)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(job.sourceURL.lastPathComponent)
-                        .font(ReMasteraType.label(14))
-                        .foregroundStyle(ReMasteraDesign.heading)
-                        .lineLimit(1)
-                    
-                    HStack(spacing: ReMasteraDesign.space8) {
-                        Text(job.preset.displayName)
-                            .foregroundStyle(ReMasteraDesign.brand)
-                        Text("•")
-                            .foregroundStyle(ReMasteraDesign.borderSubtle)
-                        Text("EST: \(SizeEstimator.formatBytes(job.fileSizeEstimate))")
+            Button(action: toggleExpand) {
+                HStack(spacing: ReMasteraDesign.space16) {
+                    // Status Icon
+                    ZStack {
+                        Circle()
+                            .fill(statusColor.opacity(0.15))
+                            .frame(width: 40, height: 40)
                         
-                        if let actual = job.actualFileSize {
-                            Text("•")
-                                .foregroundStyle(ReMasteraDesign.borderSubtle)
-                            Text("ACTUAL: \(SizeEstimator.formatBytes(actual))")
-                                .foregroundStyle(ReMasteraDesign.success)
-                        }
+                        Image(systemName: statusIcon)
+                            .font(.system(size: 20))
+                            .foregroundStyle(statusColor)
                     }
-                    .font(ReMasteraType.caption(10))
-                    .foregroundStyle(ReMasteraDesign.fgDisabled)
-                }
-                
-                Spacer()
-                
-                Text(job.status.displayName.uppercased())
-                    .font(ReMasteraType.caption(10))
-                    .tracking(1.5)
-                    .foregroundStyle(statusColor(job.status))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(statusColor(job.status).opacity(0.15))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 2)
-                            .stroke(statusColor(job.status).opacity(0.3), lineWidth: 1)
-                    )
-            }
-            .padding(ReMasteraDesign.space16)
-            .background(ReMasteraDesign.surfaceElevated)
-            
-            // Progress Bar (if processing)
-            if job.status == .processing {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(ReMasteraDesign.surface)
+                    
+                    VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
+                        Text(job.sourceURL.lastPathComponent)
+                            .font(ReMasteraType.label(16))
+                            .foregroundStyle(ReMasteraDesign.heading)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
                         
-                        Rectangle()
-                            .fill(ReMasteraDesign.warning)
-                            .frame(width: geo.size.width * job.progress)
+                        HStack(spacing: ReMasteraDesign.space8) {
+                            Text(job.preset.displayName)
+                                .font(ReMasteraType.caption(12))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(ReMasteraDesign.brand.opacity(0.15))
+                                .foregroundStyle(ReMasteraDesign.brandDeep)
+                                .clipShape(Capsule())
+                            
+                            if job.isDenoiseEnabled { enhancementTag("Denoise") }
+                            if job.isFilmLookEnabled { enhancementTag("Film") }
+                            if job.isSubtitleEnabled { enhancementTag("Subs") }
+                            if job.isUpscaleEnabled { enhancementTag("Upscale") }
+                            if job.isHdr10Enabled { enhancementTag("HDR") }
+                        }
                     }
-                }
-                .frame(height: 2)
-                
-                HStack {
-                    Text("STAGE: \(job.currentStage.uppercased())")
-                        .font(ReMasteraType.caption(9))
-                        .tracking(1)
-                        .foregroundStyle(ReMasteraDesign.warning)
+                    
                     Spacer()
-                    Text("\(Int(job.progress * 100))%")
-                        .font(ReMasteraType.caption(10))
-                        .foregroundStyle(ReMasteraDesign.warning)
-                }
-                .padding(ReMasteraDesign.space8)
-                .background(ReMasteraDesign.surfaceElevated.opacity(0.5))
-            }
-            
-            // Error Display
-            if let errorDesc = job.errorDescription {
-                HStack(alignment: .top) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(ReMasteraDesign.error)
-                    Text("ERR: \(errorDesc)")
-                        .font(ReMasteraType.caption(11))
-                        .foregroundStyle(ReMasteraDesign.error)
-                    Spacer()
-                }
-                .padding(ReMasteraDesign.space12)
-                .background(ReMasteraDesign.error.opacity(0.1))
-            }
-            
-            // Controls & Logs Toggle
-            HStack {
-                Button(action: { withAnimation { isExpanded.toggle() } }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                            .font(.system(size: 10))
-                        Text(isExpanded ? "HIDE CONSOLE" : "VIEW CONSOLE")
-                    }
-                    .font(ReMasteraType.caption(10))
-                    .tracking(1)
-                    .foregroundStyle(isExpanded ? ReMasteraDesign.heading : ReMasteraDesign.fgDisabled)
-                }
-                .buttonStyle(.plain)
-                
-                Spacer()
-                
-                // Actions
-                HStack(spacing: ReMasteraDesign.space12) {
-                    if job.status == .completed {
-                        actionButton(icon: "folder", label: "REVEAL", color: ReMasteraDesign.success) {
-                            NSWorkspace.shared.activateFileViewerSelecting([job.destinationURL])
+                    
+                    VStack(alignment: .trailing, spacing: ReMasteraDesign.space8) {
+                        Text(job.status.rawValue.uppercased())
+                            .font(ReMasteraType.label(12))
+                            .foregroundStyle(statusColor)
+                        
+                        if job.status == .processing {
+                            ProgressView(value: job.progress)
+                                .progressViewStyle(.linear)
+                                .tint(ReMasteraDesign.brand)
+                                .frame(width: 80)
+                        } else if job.status == .completed {
+                            Button("Reveal") {
+                                NSWorkspace.shared.activateFileViewerSelecting([job.destinationURL])
+                            }
+                            .font(ReMasteraType.caption(12))
+                            .buttonStyle(.link)
                         }
                     }
-                    
-                    if job.status == .failed || job.status == .cancelled {
-                        actionButton(icon: "arrow.clockwise", label: "RETRY", color: ReMasteraDesign.warning) {
-                            onRetry()
-                        }
-                    }
-                    
-                    if job.status == .processing || job.status == .queued {
-                        actionButton(icon: "stop.fill", label: "HALT", color: ReMasteraDesign.error) {
-                            onCancel()
-                        }
-                    }
-                    
-                    actionButton(icon: "trash", label: "DROP", color: ReMasteraDesign.fgDisabled) {
-                        onRemove()
-                    }
                 }
+                .padding(ReMasteraDesign.space16)
+                .background(isHovered ? ReMasteraDesign.surfaceElevated : ReMasteraDesign.surface)
             }
-            .padding(ReMasteraDesign.space12)
-            .background(ReMasteraDesign.surfaceElevated)
+            .buttonStyle(.plain)
+            .onHover { hovering in isHovered = hovering }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in isPressed = true }
+                    .onEnded { _ in isPressed = false }
+            )
             
-            // Logs Terminal
             if isExpanded {
                 Divider().background(ReMasteraDesign.borderSubtle)
+                
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 2) {
-                        if job.logs.isEmpty {
-                            Text("> awaiting execution stream...")
-                                .foregroundStyle(ReMasteraDesign.fgDisabled)
-                        } else {
-                            ForEach(job.logs, id: \.self) { log in
-                                Text(log)
-                                    .foregroundStyle(ReMasteraDesign.body)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
-                    }
-                    .font(ReMasteraType.caption(10))
-                    .padding(ReMasteraDesign.space12)
+                    Text(job.logs.isEmpty ? "Waiting for engine output..." : job.logs.joined(separator: "\n"))
+                        .font(ReMasteraType.code(12))
+                        .foregroundStyle(ReMasteraDesign.body)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(ReMasteraDesign.space16)
                 }
-                .frame(maxHeight: 160)
-                .background(ReMasteraDesign.black)
+                .frame(height: 150)
+                .background(ReMasteraDesign.surfaceElevated)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-        .overlay(
-            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-        )
+        .remasteraCard(interactive: false)
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(ReMasteraDesign.springBouncy, value: isPressed)
     }
     
-    private func statusColor(_ status: JobStatus) -> Color {
-        switch status {
-        case .queued: return ReMasteraDesign.brandSoft
-        case .processing: return ReMasteraDesign.warning
+    private var statusColor: Color {
+        switch job.status {
+        case .queued: return ReMasteraDesign.bodySubtle
+        case .processing: return ReMasteraDesign.brand
         case .completed: return ReMasteraDesign.success
         case .failed: return ReMasteraDesign.error
-        case .cancelled: return ReMasteraDesign.fgDisabled
+        case .cancelled: return ReMasteraDesign.warning
+        }
+    }
+    
+    private var statusIcon: String {
+        switch job.status {
+        case .queued: return "clock.fill"
+        case .processing: return "bolt.fill"
+        case .completed: return "checkmark.circle.fill"
+        case .failed: return "exclamationmark.triangle.fill"
+        case .cancelled: return "xmark.octagon.fill"
         }
     }
     
     @ViewBuilder
-    private func actionButton(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 10))
-                Text(label)
-                    .font(ReMasteraType.caption(10))
-                    .tracking(1)
-            }
-            .foregroundStyle(color)
-            .padding(.horizontal, 8)
+    private func enhancementTag(_ text: String) -> some View {
+        Text(text)
+            .font(ReMasteraType.caption(11))
+            .padding(.horizontal, 6)
             .padding(.vertical, 4)
-            .background(ReMasteraDesign.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 4))
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
+            .background(ReMasteraDesign.surfaceElevated)
+            .foregroundStyle(ReMasteraDesign.body)
+            .clipShape(Capsule())
     }
 }

@@ -5,14 +5,14 @@ public struct DependencyView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Friendly Header
             HStack {
                 VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
-                    Text("SYSTEM DEPENDENCIES")
-                        .font(ReMasteraType.heading(24))
+                    Text("System Dependencies")
+                        .font(ReMasteraType.heading(28))
                         .foregroundStyle(ReMasteraDesign.heading)
                     Text("Verify required command-line binaries and ML models.")
-                        .font(ReMasteraType.body(14))
+                        .font(ReMasteraType.body(15))
                         .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
@@ -25,12 +25,11 @@ public struct DependencyView: View {
                 VStack(spacing: ReMasteraDesign.space32) {
                     
                     VStack(alignment: .leading, spacing: ReMasteraDesign.space16) {
-                        Text("CORE BINARIES")
-                            .font(ReMasteraType.label(12))
-                            .tracking(2)
-                            .foregroundStyle(ReMasteraDesign.brand)
+                        Text("Core Binaries")
+                            .font(ReMasteraType.label(14))
+                            .foregroundStyle(ReMasteraDesign.brandDeep)
                         
-                        VStack(spacing: 0) {
+                        VStack(spacing: ReMasteraDesign.space12) {
                             DependencyRow(
                                 name: "FFmpeg",
                                 description: "Core media processing and demuxing engine.",
@@ -38,7 +37,7 @@ public struct DependencyView: View {
                                 status: .installed("v7.0.1"),
                                 installHint: "brew install ffmpeg"
                             )
-                            Divider().background(ReMasteraDesign.borderSubtle)
+                            
                             DependencyRow(
                                 name: "FFprobe",
                                 description: "Media stream analyzer.",
@@ -47,21 +46,14 @@ public struct DependencyView: View {
                                 installHint: "brew install ffmpeg"
                             )
                         }
-                        .background(ReMasteraDesign.surfaceElevated)
-                        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                        )
                     }
                     
                     VStack(alignment: .leading, spacing: ReMasteraDesign.space16) {
-                        Text("MACHINE LEARNING MODULES")
-                            .font(ReMasteraType.label(12))
-                            .tracking(2)
-                            .foregroundStyle(ReMasteraDesign.brand)
+                        Text("Machine Learning Modules")
+                            .font(ReMasteraType.label(14))
+                            .foregroundStyle(ReMasteraDesign.brandDeep)
                         
-                        VStack(spacing: 0) {
+                        VStack(spacing: ReMasteraDesign.space12) {
                             DependencyRow(
                                 name: "Real-ESRGAN (NCNN Vulkan)",
                                 description: "Neural network upscale engine for animation and film.",
@@ -69,7 +61,7 @@ public struct DependencyView: View {
                                 status: .missing,
                                 installHint: "brew install realesrgan-ncnn-vulkan"
                             )
-                            Divider().background(ReMasteraDesign.borderSubtle)
+                            
                             DependencyRow(
                                 name: "Whisper.cpp",
                                 description: "High-performance CoreML inference for subtitle extraction.",
@@ -78,17 +70,12 @@ public struct DependencyView: View {
                                 installHint: "brew install whisper-cpp"
                             )
                         }
-                        .background(ReMasteraDesign.surfaceElevated)
-                        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
-                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                        )
                     }
                 }
                 .padding(ReMasteraDesign.space32)
             }
         }
+        .background(ReMasteraDesign.background)
     }
 }
 
@@ -107,7 +94,7 @@ struct DependencyRow: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: ReMasteraDesign.space16) {
-            // Status Icon
+            // Bouncy Status Icon
             Group {
                 switch status {
                 case .installed:
@@ -122,92 +109,81 @@ struct DependencyRow: View {
                         .controlSize(.small)
                 }
             }
-            .font(.system(size: 20))
-            .frame(width: 24, height: 24)
-            .padding(.top, 2)
+            .font(.system(size: 24))
+            .frame(width: 32, height: 32)
             
             VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
                 HStack {
                     Text(name)
-                        .font(ReMasteraType.label(14))
+                        .font(ReMasteraType.label(16))
                         .foregroundStyle(ReMasteraDesign.heading)
                     
                     Spacer()
                     
                     switch status {
                     case .installed(let version):
-                        Text("INSTALLED: \(version)")
-                            .font(ReMasteraType.caption(10))
-                            .tracking(1)
+                        Text("Installed: \(version)")
+                            .font(ReMasteraType.caption(12))
                             .foregroundStyle(ReMasteraDesign.success)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, 10)
                             .padding(.vertical, 4)
                             .background(ReMasteraDesign.success.opacity(0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .clipShape(Capsule())
                     case .missing:
-                        Text("MISSING")
-                            .font(ReMasteraType.caption(10))
-                            .tracking(1)
+                        Text("Missing")
+                            .font(ReMasteraType.caption(12))
                             .foregroundStyle(ReMasteraDesign.error)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, 10)
                             .padding(.vertical, 4)
                             .background(ReMasteraDesign.error.opacity(0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .clipShape(Capsule())
                     case .checking:
-                        Text("CHECKING")
-                            .font(ReMasteraType.caption(10))
-                            .tracking(1)
+                        Text("Checking")
+                            .font(ReMasteraType.caption(12))
                             .foregroundStyle(ReMasteraDesign.warning)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, 10)
                             .padding(.vertical, 4)
                             .background(ReMasteraDesign.warning.opacity(0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .clipShape(Capsule())
                     }
                 }
                 
                 Text(description)
-                    .font(ReMasteraType.body(12))
+                    .font(ReMasteraType.body(14))
                     .foregroundStyle(ReMasteraDesign.body)
                 
-                HStack(spacing: ReMasteraDesign.space12) {
-                    Text("CMD:")
-                        .font(ReMasteraType.caption(10))
-                        .foregroundStyle(ReMasteraDesign.fgDisabled)
+                HStack(spacing: ReMasteraDesign.space8) {
+                    Image(systemName: "terminal")
+                        .font(.system(size: 12))
+                        .foregroundStyle(ReMasteraDesign.bodySubtle)
                     Text(command)
-                        .font(ReMasteraType.caption(11))
-                        .foregroundStyle(ReMasteraDesign.brand)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(ReMasteraDesign.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
-                        )
+                        .font(ReMasteraType.code(12))
+                        .foregroundStyle(ReMasteraDesign.body)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(ReMasteraDesign.surfaceElevated)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 .padding(.top, 4)
                 
                 if case .missing = status {
                     HStack(spacing: 8) {
-                        Image(systemName: "terminal")
-                            .font(.system(size: 10))
-                            .foregroundStyle(ReMasteraDesign.fgDisabled)
+                        Image(systemName: "arrow.down.app.fill")
+                            .font(.system(size: 12))
+                            .foregroundStyle(ReMasteraDesign.error)
                         Text(installHint)
-                            .font(ReMasteraType.caption(11))
+                            .font(ReMasteraType.code(12))
                             .foregroundStyle(ReMasteraDesign.heading)
                     }
-                    .padding(8)
+                    .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(ReMasteraDesign.black)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .stroke(ReMasteraDesign.error.opacity(0.3), lineWidth: 1)
-                    )
+                    .background(ReMasteraDesign.error.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                     .padding(.top, 4)
                 }
             }
         }
         .padding(ReMasteraDesign.space16)
+        .remasteraCard(interactive: false)
     }
 }
