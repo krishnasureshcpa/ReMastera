@@ -13,7 +13,7 @@ if [ ! -f "$DMG_PATH" ]; then
 fi
 
 echo "Mounting DMG..."
-MOUNT_POINT=$(hdiutil attach -nobrowse "$DMG_PATH" | grep /Volumes | awk '{print $3}')
+MOUNT_POINT=$(hdiutil attach -nobrowse "$DMG_PATH" | grep /Volumes | awk '{for (i=3; i<=NF; i++) printf $i " "; print ""}' | sed 's/ $//')
 echo "Mounted at $MOUNT_POINT"
 
 echo "Copying to Applications (requires sudo/admin permissions if Applications is protected, but usually works for standard installs)..."

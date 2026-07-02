@@ -8,26 +8,40 @@ public struct ReMasteraApp: App {
     
     public var body: some Scene {
         WindowGroup {
-            NavigationSplitView {
-                SidebarView(selection: $selection)
-            } detail: {
-                switch selection {
-                case .assistant:
-                    WelcomeAssistantView()
-                case .dashboard:
-                    DashboardView(queueManager: queueManager)
-                case .queue:
-                    QueueView(queueManager: queueManager)
-                case .dependencies:
-                    DependencyView()
-                case .privacy:
-                    PrivacyView()
-                case .settings:
-                    SettingsView()
+            ZStack {
+                ReMasteraDesign.black.ignoresSafeArea()
+                
+                HStack(spacing: 0) {
+                    SidebarView(selection: $selection)
+                    
+                    // Vertical brand-colored divider
+                    Rectangle()
+                        .fill(ReMasteraDesign.borderSubtle)
+                        .frame(width: 1)
+                    
+                    // Detail view
+                    ZStack {
+                        ReMasteraDesign.black.ignoresSafeArea()
+                        
+                        switch selection {
+                        case .assistant:
+                            WelcomeAssistantView()
+                        case .dashboard:
+                            DashboardView(queueManager: queueManager)
+                        case .queue:
+                            QueueView(queueManager: queueManager)
+                        case .dependencies:
+                            DependencyView()
+                        case .privacy:
+                            PrivacyView()
+                        case .settings:
+                            SettingsView()
+                        }
+                    }
                 }
             }
-            .navigationTitle("ReMastera")
-            .frame(minWidth: 960, minHeight: 640)
+            .preferredColorScheme(.dark)
+            .frame(minWidth: 1060, minHeight: 680)
         }
         .windowStyle(.hiddenTitleBar)
     }

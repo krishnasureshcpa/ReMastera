@@ -1,138 +1,213 @@
 import SwiftUI
 
 public struct DependencyView: View {
-    @State private var dependencies: [DependencyInfo] = []
-    @State private var isScanning = false
-    
     public init() {}
     
     public var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(spacing: 0) {
+            // Header
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Dependency Manager")
-                        .font(.title2.bold())
-                    Text("ReMastera executes local CLI tools privately. No files are uploaded.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
+                    Text("SYSTEM DEPENDENCIES")
+                        .font(ReMasteraType.heading(24))
+                        .foregroundStyle(ReMasteraDesign.heading)
+                    Text("Verify required command-line binaries and ML models.")
+                        .font(ReMasteraType.body(14))
+                        .foregroundStyle(ReMasteraDesign.body)
                 }
                 Spacer()
-                Button(action: scan) {
-                    Label(isScanning ? "Scanning..." : "Rescan Tools", systemImage: "arrow.clockwise")
-                }
-                .disabled(isScanning)
-                .buttonStyle(.bordered)
             }
-            .padding(.bottom, 8)
+            .padding(ReMasteraDesign.space32)
             
-            if dependencies.isEmpty {
-                VStack(spacing: 12) {
-                    ProgressView()
-                    Text("Initializing tools configuration...")
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        ForEach(dependencies) { dep in
-                            dependencyRow(dep)
+            SectionDivider()
+            
+            ScrollView {
+                VStack(spacing: ReMasteraDesign.space32) {
+                    
+                    VStack(alignment: .leading, spacing: ReMasteraDesign.space16) {
+                        Text("CORE BINARIES")
+                            .font(ReMasteraType.label(12))
+                            .tracking(2)
+                            .foregroundStyle(ReMasteraDesign.brand)
+                        
+                        VStack(spacing: 0) {
+                            DependencyRow(
+                                name: "FFmpeg",
+                                description: "Core media processing and demuxing engine.",
+                                command: "ffmpeg",
+                                status: .installed("v7.0.1"),
+                                installHint: "brew install ffmpeg"
+                            )
+                            Divider().background(ReMasteraDesign.borderSubtle)
+                            DependencyRow(
+                                name: "FFprobe",
+                                description: "Media stream analyzer.",
+                                command: "ffprobe",
+                                status: .installed("v7.0.1"),
+                                installHint: "brew install ffmpeg"
+                            )
                         }
+                        .background(ReMasteraDesign.surfaceElevated)
+                        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
+                        )
                     }
-                    .padding(.trailing, 8)
+                    
+                    VStack(alignment: .leading, spacing: ReMasteraDesign.space16) {
+                        Text("MACHINE LEARNING MODULES")
+                            .font(ReMasteraType.label(12))
+                            .tracking(2)
+                            .foregroundStyle(ReMasteraDesign.brand)
+                        
+                        VStack(spacing: 0) {
+                            DependencyRow(
+                                name: "Real-ESRGAN (NCNN Vulkan)",
+                                description: "Neural network upscale engine for animation and film.",
+                                command: "realesrgan-ncnn-vulkan",
+                                status: .missing,
+                                installHint: "brew install realesrgan-ncnn-vulkan"
+                            )
+                            Divider().background(ReMasteraDesign.borderSubtle)
+                            DependencyRow(
+                                name: "Whisper.cpp",
+                                description: "High-performance CoreML inference for subtitle extraction.",
+                                command: "whisper-cpp",
+                                status: .missing,
+                                installHint: "brew install whisper-cpp"
+                            )
+                        }
+                        .background(ReMasteraDesign.surfaceElevated)
+                        .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
+                        )
+                    }
+                }
+                .padding(ReMasteraDesign.space32)
+            }
+        }
+    }
+}
+
+enum DependencyStatus {
+    case installed(String)
+    case missing
+    case checking
+}
+
+struct DependencyRow: View {
+    let name: String
+    let description: String
+    let command: String
+    let status: DependencyStatus
+    let installHint: String
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: ReMasteraDesign.space16) {
+            // Status Icon
+            Group {
+                switch status {
+                case .installed:
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(ReMasteraDesign.success)
+                case .missing:
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(ReMasteraDesign.error)
+                case .checking:
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .controlSize(.small)
                 }
             }
+            .font(.system(size: 20))
+            .frame(width: 24, height: 24)
+            .padding(.top, 2)
             
-            Divider()
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Developer Bootstrap Guide")
-                    .font(.headline)
-                Text("ReMastera will never silently download or install packages. To bootstrap dependencies manually, use the project command-line utility:")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
+                HStack {
+                    Text(name)
+                        .font(ReMasteraType.label(14))
+                        .foregroundStyle(ReMasteraDesign.heading)
+                    
+                    Spacer()
+                    
+                    switch status {
+                    case .installed(let version):
+                        Text("INSTALLED: \(version)")
+                            .font(ReMasteraType.caption(10))
+                            .tracking(1)
+                            .foregroundStyle(ReMasteraDesign.success)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(ReMasteraDesign.success.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                    case .missing:
+                        Text("MISSING")
+                            .font(ReMasteraType.caption(10))
+                            .tracking(1)
+                            .foregroundStyle(ReMasteraDesign.error)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(ReMasteraDesign.error.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                    case .checking:
+                        Text("CHECKING")
+                            .font(ReMasteraType.caption(10))
+                            .tracking(1)
+                            .foregroundStyle(ReMasteraDesign.warning)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(ReMasteraDesign.warning.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                    }
+                }
                 
-                Text("./scripts/bootstrap.sh")
-                    .font(.system(.subheadline, design: .monospaced))
+                Text(description)
+                    .font(ReMasteraType.body(12))
+                    .foregroundStyle(ReMasteraDesign.body)
+                
+                HStack(spacing: ReMasteraDesign.space12) {
+                    Text("CMD:")
+                        .font(ReMasteraType.caption(10))
+                        .foregroundStyle(ReMasteraDesign.fgDisabled)
+                    Text(command)
+                        .font(ReMasteraType.caption(11))
+                        .foregroundStyle(ReMasteraDesign.brand)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(ReMasteraDesign.black)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
+                        )
+                }
+                .padding(.top, 4)
+                
+                if case .missing = status {
+                    HStack(spacing: 8) {
+                        Image(systemName: "terminal")
+                            .font(.system(size: 10))
+                            .foregroundStyle(ReMasteraDesign.fgDisabled)
+                        Text(installHint)
+                            .font(ReMasteraType.caption(11))
+                            .foregroundStyle(ReMasteraDesign.heading)
+                    }
                     .padding(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(nsColor: .textBackgroundColor))
-                    .cornerRadius(6)
-            }
-            .padding(.top, 8)
-        }
-        .padding()
-        .onAppear(perform: scan)
-    }
-    
-    private func scan() {
-        isScanning = true
-        // Query in background
-        DispatchQueue.global(qos: .userInitiated).async {
-            let results = DependencyDetector.scanDependencies()
-            DispatchQueue.main.async {
-                self.dependencies = results
-                self.isScanning = false
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func dependencyRow(_ dep: DependencyInfo) -> some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: dep.isInstalled ? "checkmark.circle.fill" : (dep.isRequired ? "xmark.circle.fill" : "exclamationmark.triangle.fill"))
-                .font(.system(size: 24))
-                .foregroundStyle(dep.isInstalled ? .green : (dep.isRequired ? .red : .yellow))
-                .padding(.top, 2)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(dep.name)
-                        .font(.headline)
-                    Text(dep.isRequired ? "(Required)" : "(Optional)")
-                        .font(.caption)
-                        .foregroundStyle(dep.isRequired ? .primary : .secondary)
-                    
-                    if let version = dep.version {
-                        Text("v\(version)")
-                            .font(.caption.monospaced())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.secondary.opacity(0.15))
-                            .cornerRadius(4)
-                    }
-                }
-                
-                Text(dep.purpose)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                
-                if dep.isInstalled, let path = dep.path {
-                    Text("Location: \(path)")
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.secondary)
-                } else {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Missing dependency. To install, run:")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(dep.installCommand)
-                            .font(.caption.monospaced())
-                            .padding(6)
-                            .background(Color(nsColor: .textBackgroundColor))
-                            .cornerRadius(4)
-                    }
+                    .background(ReMasteraDesign.black)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(ReMasteraDesign.error.opacity(0.3), lineWidth: 1)
+                    )
                     .padding(.top, 4)
                 }
             }
-            Spacer()
         }
-        .padding()
-        .background(Color.secondary.opacity(0.05))
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.secondary.opacity(0.1), lineWidth: 1)
-        )
+        .padding(ReMasteraDesign.space16)
     }
 }

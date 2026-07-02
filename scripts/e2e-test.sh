@@ -21,6 +21,6 @@ cp "$TEST_FILE" "$TEST_DIR/"
 echo "Running ReMastera CLI against test directory..."
 # Assuming we want to build and run the release version
 swift build -c release
-.build/release/ReMasteraCLI "$TEST_DIR" "${TEST_DIR}_Processed" --preset fast-preview
+.build/release/ReMasteraCLI "$TEST_DIR/test-spanish-file.mp4" "${TEST_DIR}_Processed.mp4" --preset fast-preview
 
 echo "Test complete! Check ${TEST_DIR}_Processed for the output."

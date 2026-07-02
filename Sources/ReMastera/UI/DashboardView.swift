@@ -1,463 +1,278 @@
 import SwiftUI
-import AppKit
+import UniformTypeIdentifiers
 
 public struct DashboardView: View {
     @Bindable var queueManager: QueueManager
+    @State private var isTargeted = false
+    @State private var selectedPreset: Preset = .balanced4K
     
-    // Selection state
-    @State private var sourceURL: URL? = nil
-    @State private var isDirectorySource = false
-    @State private var discoveredVideos: [URL] = []
-    
-    @State private var outputDirectoryURL: URL? = nil
-    @State private var isMirrorEnabled = false
-    @State private var selectedPreset = Preset.balanced4K
-    @State private var selectedOverwritePolicy = OverwritePolicy.createNumberedCopy
-    
-    // Pipeline flags
-    @State private var isDenoiseEnabled = true
-    @State private var isFilmLookEnabled = true
+    // Feature Toggles
+    @State private var isDenoiseEnabled = false
+    @State private var isFilmLookEnabled = false
     @State private var isSubtitleEnabled = false
-    @State private var isUpscaleEnabled = true
-    @State private var isHdr10Enabled = true
-    
-    @State private var isDraggingOver = false
+    @State private var isUpscaleEnabled = false
+    @State private var isHdr10Enabled = false
     
     public init(queueManager: QueueManager) {
         self.queueManager = queueManager
     }
     
     public var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            // Left Content: Source Selection & Info
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Cinematic Restoration Workspace")
-                            .font(.title2.bold())
-                        Text("Import video assets and configure processing pipelines locally.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    // Ingestion drop zone
-                    dropZone
-                        .frame(height: 180)
-                    
-                    if sourceURL != nil {
-                        sourceMetadataPanel
-                    }
-                    
-                    // Pipeline configuration checklist
-                    pipelineStagesPanel
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space4) {
+                    Text("DASHBOARD")
+                        .font(ReMasteraType.heading(24))
+                        .foregroundStyle(ReMasteraDesign.heading)
+                    Text("Drop media files here to begin processing sequence.")
+                        .font(ReMasteraType.body(14))
+                        .foregroundStyle(ReMasteraDesign.body)
                 }
-                .padding()
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
+            .padding(ReMasteraDesign.space32)
             
-            Divider()
+            SectionDivider()
             
-            // Right Inspector Panel: Settings & Bitrate Size Estimator
-            inspectorPanel
-        }
-        .onAppear {
-            setDefaultPaths()
+            HStack(spacing: 0) {
+                // Left: Drop Zone
+                VStack {
+                    ZStack {
+                        // Drop Zone Background
+                        RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                            .fill(isTargeted ? ReMasteraDesign.brandSofter : ReMasteraDesign.surfaceElevated)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                                    .strokeBorder(
+                                        isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle,
+                                        style: StrokeStyle(lineWidth: isTargeted ? 2 : 1, dash: isTargeted ? [10] : [])
+                                    )
+                            )
+                        
+                        VStack(spacing: ReMasteraDesign.space24) {
+                            Image(systemName: "plus.square.dashed")
+                                .font(.system(size: 64, weight: .ultraLight))
+                                .foregroundStyle(isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.brandSoft)
+                            
+                            VStack(spacing: ReMasteraDesign.space8) {
+                                Text("INITIALIZE BATCH")
+                                    .font(ReMasteraType.label(16))
+                                    .tracking(2)
+                                    .foregroundStyle(isTargeted ? ReMasteraDesign.brand : ReMasteraDesign.heading)
+                                Text("Drag & drop .mov, .mp4, or .mkv files")
+                                    .font(ReMasteraType.caption(12))
+                                    .foregroundStyle(ReMasteraDesign.fgDisabled)
+                            }
+                        }
+                    }
+                    .padding(ReMasteraDesign.space32)
+                    .onDrop(of: [UTType.movie, UTType.video], isTargeted: $isTargeted) { providers in
+                        handleDrop(providers: providers)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                // Vertical Divider
+                Rectangle()
+                    .fill(ReMasteraDesign.borderSubtle)
+                    .frame(width: 1)
+                
+                // Right: Configuration Panel
+                VStack(alignment: .leading, spacing: ReMasteraDesign.space24) {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: ReMasteraDesign.space24) {
+                            Text("TARGET PRESET")
+                                .font(ReMasteraType.label(12))
+                                .tracking(2)
+                                .foregroundStyle(ReMasteraDesign.brand)
+                            
+                            VStack(spacing: ReMasteraDesign.space12) {
+                                ForEach(Preset.allCases) { preset in
+                                    PresetRow(
+                                        preset: preset,
+                                        isSelected: selectedPreset == preset,
+                                        action: { selectedPreset = preset }
+                                    )
+                                }
+                            }
+                            
+                            Text("ENHANCEMENTS")
+                                .font(ReMasteraType.label(12))
+                                .tracking(2)
+                                .foregroundStyle(ReMasteraDesign.brand)
+                                .padding(.top, ReMasteraDesign.space16)
+                            
+                            VStack(spacing: 0) {
+                                DashboardToggle(title: "Standard Denoise (hqdn3d)", isOn: $isDenoiseEnabled)
+                                Divider().background(ReMasteraDesign.borderSubtle)
+                                DashboardToggle(title: "Kodak Film Look (5247)", isOn: $isFilmLookEnabled)
+                                Divider().background(ReMasteraDesign.borderSubtle)
+                                DashboardToggle(title: "Subtitle Extraction", isOn: $isSubtitleEnabled)
+                                Divider().background(ReMasteraDesign.borderSubtle)
+                                DashboardToggle(title: "Neural Upscale (RealESRGAN)", isOn: $isUpscaleEnabled)
+                                Divider().background(ReMasteraDesign.borderSubtle)
+                                DashboardToggle(title: "HDR10 Tagging", isOn: $isHdr10Enabled)
+                            }
+                            .background(ReMasteraDesign.surfaceElevated)
+                            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                                    .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
+                            )
+                        }
+                    }
+                    
+                    VStack(alignment: .leading, spacing: ReMasteraDesign.space8) {
+                        Text("SYSTEM READY")
+                            .font(ReMasteraType.caption(10))
+                            .tracking(2)
+                            .foregroundStyle(ReMasteraDesign.success)
+                        Text("Awaiting input stream...")
+                            .font(ReMasteraType.body(12))
+                            .foregroundStyle(ReMasteraDesign.body)
+                    }
+                    .padding(ReMasteraDesign.space16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(ReMasteraDesign.surfaceElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                            .stroke(ReMasteraDesign.borderSubtle, lineWidth: 1)
+                    )
+                }
+                .padding(ReMasteraDesign.space32)
+                .frame(width: 320)
+                .background(ReMasteraDesign.surface)
+            }
         }
     }
     
-    // Ingestion drop zone
-    private var dropZone: some View {
-        VStack(spacing: 16) {
-            Image(systemName: isDirectorySource ? "folder.badge.plus" : "film.badge.plus")
-                .font(.system(size: 40))
-                .foregroundStyle(isDraggingOver ? Color.accentColor : Color.secondary)
-            
-            VStack(spacing: 6) {
-                Text(sourceURL == nil ? "Drag and drop video files or folders here" : (isDirectorySource ? "Folder Loaded" : "Video File Loaded"))
-                    .font(.headline)
-                Text("Supports mp4, mov, mkv, avi, m4v, and webm")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            HStack(spacing: 12) {
-                Button(action: selectFile) {
-                    Label("Select File", systemImage: "doc")
+    private func handleDrop(providers: [NSItemProvider]) -> Bool {
+        var handled = false
+        for provider in providers {
+            if provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                provider.loadItem(forTypeIdentifier: UTType.movie.identifier, options: nil) { item, error in
+                    guard let data = item as? Data,
+                          let url = URL(dataRepresentation: data, relativeTo: nil) else { return }
+                    DispatchQueue.main.async {
+                        queueJob(url: url)
+                    }
                 }
-                .buttonStyle(.bordered)
-                
-                Button(action: selectFolder) {
-                    Label("Select Folder", systemImage: "folder")
+                handled = true
+            } else if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
+                provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, error in
+                    guard let data = item as? Data,
+                          let urlString = String(data: data, encoding: .utf8),
+                          let url = URL(string: urlString) else { return }
+                    DispatchQueue.main.async {
+                        queueJob(url: url)
+                    }
                 }
-                .buttonStyle(.bordered)
+                handled = true
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(isDraggingOver ? Color.accentColor.opacity(0.06) : Color.secondary.opacity(0.03))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isDraggingOver ? Color.accentColor : Color.secondary.opacity(0.15), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .bevel, dash: [6, 4]))
+        return handled
+    }
+    
+    private func queueJob(url: URL) {
+        let outputDir = URL(fileURLWithPath: NSHomeDirectory() + "/Movies/ReMastera_Processed")
+        try? FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
+        
+        var tags = [selectedPreset.displayName.replacingOccurrences(of: " ", with: "")]
+        if isDenoiseEnabled { tags.append("Denoised") }
+        if isFilmLookEnabled { tags.append("Kodak5247") }
+        if isSubtitleEnabled { tags.append("Subs") }
+        if isUpscaleEnabled { tags.append("Upscaled") }
+        if isHdr10Enabled { tags.append("HDR10") }
+        
+        let destinationURL = OutputPathBuilder.buildOutputPath(
+            sourceURL: url,
+            inputDirectoryURL: nil,
+            outputDirectoryURL: outputDir,
+            tags: tags,
+            overwritePolicy: .createNumberedCopy
         )
-        .onDrop(of: [.fileURL], isTargeted: $isDraggingOver) { providers in
-            guard let provider = providers.first else { return false }
-            _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                if let localURL = url {
-                    DispatchQueue.main.sync {
-                        loadURL(localURL)
-                    }
-                }
-            }
-            return true
-        }
+        
+        queueManager.addJob(
+            sourceURL: url,
+            destinationURL: destinationURL,
+            preset: selectedPreset,
+            isDenoiseEnabled: isDenoiseEnabled,
+            isFilmLookEnabled: isFilmLookEnabled,
+            isSubtitleEnabled: isSubtitleEnabled,
+            isUpscaleEnabled: isUpscaleEnabled,
+            isHdr10Enabled: isHdr10Enabled
+        )
     }
+}
+
+struct DashboardToggle: View {
+    let title: String
+    @Binding var isOn: Bool
     
-    // Discovered video details panel
-    private var sourceMetadataPanel: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Source Metadata")
-                .font(.headline)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Type:")
-                        .bold()
-                        .frame(width: 80, alignment: .leading)
-                    Text(isDirectorySource ? "Directory Batch" : "Single Video File")
-                }
-                HStack {
-                    Text("Location:")
-                        .bold()
-                        .frame(width: 80, alignment: .leading)
-                    Text(sourceURL?.path ?? "")
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .font(.system(.caption, design: .monospaced))
-                }
-                
-                if isDirectorySource {
-                    HStack {
-                        Text("Discovered:")
-                            .bold()
-                            .frame(width: 80, alignment: .leading)
-                        Text("\(discoveredVideos.count) video assets")
-                            .bold()
-                            .foregroundStyle(.tint)
-                    }
-                }
-            }
-            .font(.subheadline)
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.secondary.opacity(0.04))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.secondary.opacity(0.08), lineWidth: 1)
-            )
-        }
-    }
-    
-    // Toggle switches for stages
-    private var pipelineStagesPanel: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Modular Enhancement Pipeline")
-                .font(.headline)
-            
-            VStack(spacing: 0) {
-                stageToggle(title: "Standard Denoise", description: "Softens grain and luma/chroma noise using hqdn3d filter.", isOn: $isDenoiseEnabled, isRequired: false)
-                Divider()
-                stageToggle(title: "Kodak 5247-inspired Look", description: "Applies warm highlight grading and slight cyan shadow balance.", isOn: $isFilmLookEnabled, isRequired: false)
-                Divider()
-                stageToggle(title: "Standard Upscale (4K)", description: "Rescales input resolution up to 3840x2160 via Lanczos interpolation.", isOn: $isUpscaleEnabled, isRequired: false)
-                Divider()
-                stageToggle(title: "HDR10 Compatibility", description: "Tags output container with Rec.2020 color coordinates and PQ transfer curve.", isOn: $isHdr10Enabled, isRequired: false)
-                Divider()
-                stageToggle(title: "Subtitle Extraction", description: "Extracts soft-subtitles locally using whisper.cpp backend (requires optional tool).", isOn: $isSubtitleEnabled, isRequired: false)
-            }
-            .background(Color.secondary.opacity(0.03))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.secondary.opacity(0.08), lineWidth: 1)
-            )
-        }
-    }
-    
-    // Individual stage toggle view
-    @ViewBuilder
-    private func stageToggle(title: String, description: String, isOn: Binding<Bool>, isRequired: Bool) -> some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline.bold())
-                Text(description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(ReMasteraType.label(12))
+                .foregroundStyle(ReMasteraDesign.heading)
             Spacer()
-            if isRequired {
-                Text("Locked")
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-            } else {
-                Toggle("", isOn: isOn)
-                    .labelsHidden()
-            }
+            Toggle("", isOn: $isOn)
+                .toggleStyle(.switch)
+                .tint(ReMasteraDesign.brand)
+                .controlSize(.small)
         }
-        .padding(.horizontal)
-        .padding(.vertical, 10)
+        .padding(ReMasteraDesign.space12)
     }
+}
+
+struct PresetRow: View {
+    let preset: Preset
+    let isSelected: Bool
+    let action: () -> Void
     
-    // Sidebar inspector panel for preset and sizing parameters
-    private var inspectorPanel: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Export settings")
-                .font(.headline)
-                .padding(.bottom, 4)
-            
-            // Preset configuration
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Export Preset")
-                    .font(.subheadline.bold())
-                Picker("", selection: $selectedPreset) {
-                    ForEach(Preset.allCases) { preset in
-                        Text(preset.displayName).tag(preset)
+    @State private var isHovered = false
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: ReMasteraDesign.space12) {
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? ReMasteraDesign.brand : ReMasteraDesign.borderSubtle, lineWidth: 1.5)
+                        .frame(width: 16, height: 16)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(ReMasteraDesign.brand)
+                            .frame(width: 8, height: 8)
+                            .shadow(color: ReMasteraDesign.brand.opacity(0.8), radius: 4)
                     }
                 }
-                .labelsHidden()
                 
-                Text(selectedPreset.description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 2)
-            }
-            
-            // Bitrates display
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text("Target Video:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text("\(Int(selectedPreset.videoBitrateMbps)) Mbps")
-                        .font(.caption.bold())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(preset.displayName)
+                        .font(ReMasteraType.label(14))
+                        .foregroundStyle(isSelected ? ReMasteraDesign.heading : ReMasteraDesign.body)
+                    Text(preset.description)
+                        .font(ReMasteraType.caption(11))
+                        .foregroundStyle(ReMasteraDesign.fgDisabled)
                 }
-                HStack {
-                    Text("Target Audio:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text("\(Int(selectedPreset.audioBitrateKbps)) kbps")
-                        .font(.caption.bold())
-                }
+                Spacer()
             }
-            .padding(10)
-            .background(Color.secondary.opacity(0.05))
-            .cornerRadius(6)
-            
-            Divider()
-            
-            // Destination settings
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Output Directory")
-                    .font(.subheadline.bold())
-                
-                HStack(spacing: 8) {
-                    Text(outputDirectoryURL?.path ?? "Choose folder...")
-                        .font(.system(.caption, design: .monospaced))
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Spacer()
-                    Button("Choose...") { selectOutputFolder() }
-                        .buttonStyle(.bordered)
-                }
-                
-                Toggle("Mirror Folder Structure", isOn: $isMirrorEnabled)
-                    .disabled(!isDirectorySource)
-                    .font(.caption)
-                
-                Picker("Overwrite Policy", selection: $selectedOverwritePolicy) {
-                    Text("Numbered Copy").tag(OverwritePolicy.createNumberedCopy)
-                    Text("Replace Existing").tag(OverwritePolicy.replaceExisting)
-                    Text("Skip Existing").tag(OverwritePolicy.skipExisting)
-                }
-                .font(.caption)
-            }
-            
-            Divider()
-            
-            // Size estimator box
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Estimated output size")
-                    .font(.subheadline.bold())
-                Text("Compact encoding options guarantee clean results without storage bloating.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                let sampleEstimate = SizeEstimator.estimateSize(
-                    durationSeconds: 180.0, // base estimation on a 3-minute sample
-                    videoBitrateMbps: selectedPreset.videoBitrateMbps,
-                    audioBitrateKbps: selectedPreset.audioBitrateKbps
-                )
-                
-                HStack {
-                    Image(systemName: "opticaldisc")
-                    Text("Sample 3-min Clip: ~\(SizeEstimator.formatBytes(sampleEstimate))")
-                        .font(.subheadline.monospacedDigit().bold())
-                }
-                .padding(.top, 4)
-                .foregroundStyle(.tint)
-            }
-            
-            Spacer()
-            
-            Button(action: addJobsToQueue) {
-                Text(isDirectorySource ? "Queue Batch (\(discoveredVideos.count) items)" : "Queue Video Asset")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(sourceURL == nil || outputDirectoryURL == nil || (isDirectorySource && discoveredVideos.isEmpty))
-        }
-        .padding()
-        .frame(width: 280)
-        .background(Color.secondary.opacity(0.02))
-    }
-    
-    private func setDefaultPaths() {
-        let fileManager = FileManager.default
-        let homeDir = fileManager.homeDirectoryForCurrentUser
-        let defaultOutput = homeDir.appendingPathComponent("Movies/ReMastera_Processed")
-        try? fileManager.createDirectory(at: defaultOutput, withIntermediateDirectories: true)
-        self.outputDirectoryURL = defaultOutput
-    }
-    
-    private func selectFile() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
-        panel.allowedContentTypes = [.movie, .video, .quickTimeMovie, .mpeg4Movie]
-        
-        if panel.runModal() == .OK, let url = panel.url {
-            loadURL(url)
-        }
-    }
-    
-    private func selectFolder() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        
-        if panel.runModal() == .OK, let url = panel.url {
-            loadURL(url)
-        }
-    }
-    
-    private func selectOutputFolder() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        
-        if panel.runModal() == .OK, let url = panel.url {
-            self.outputDirectoryURL = url
-        }
-    }
-    
-    private func loadURL(_ url: URL) {
-        var isDir: ObjCBool = false
-        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) {
-            self.sourceURL = url
-            self.isDirectorySource = isDir.boolValue
-            
-            if isDir.boolValue {
-                scanFolderForVideos(url)
-                self.isMirrorEnabled = true
-            } else {
-                self.discoveredVideos = []
-                self.isMirrorEnabled = false
-            }
-        }
-    }
-    
-    private func scanFolderForVideos(_ url: URL) {
-        let fileManager = FileManager.default
-        let supportedExtensions = ["mp4", "mov", "mkv", "avi", "m4v", "webm"]
-        var videos: [URL] = []
-        
-        if let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
-            for case let fileURL as URL in enumerator {
-                if supportedExtensions.contains(fileURL.pathExtension.lowercased()) {
-                    videos.append(fileURL)
-                }
-            }
-        }
-        
-        self.discoveredVideos = videos
-    }
-    
-    private func addJobsToQueue() {
-        guard let outputDir = outputDirectoryURL else { return }
-        
-        if isDirectorySource {
-            for videoURL in discoveredVideos {
-                let destURL = OutputPathBuilder.buildOutputPath(
-                    sourceURL: videoURL,
-                    inputDirectoryURL: sourceURL,
-                    outputDirectoryURL: outputDir,
-                    tags: getActiveTags(),
-                    overwritePolicy: selectedOverwritePolicy
-                )
-                
-                queueManager.addJob(
-                    sourceURL: videoURL,
-                    destinationURL: destURL,
-                    preset: selectedPreset,
-                    isDenoiseEnabled: isDenoiseEnabled,
-                    isFilmLookEnabled: isFilmLookEnabled,
-                    isSubtitleEnabled: isSubtitleEnabled,
-                    isUpscaleEnabled: isUpscaleEnabled,
-                    isHdr10Enabled: isHdr10Enabled
-                )
-            }
-        } else if let fileURL = sourceURL {
-            let destURL = OutputPathBuilder.buildOutputPath(
-                sourceURL: fileURL,
-                inputDirectoryURL: nil,
-                outputDirectoryURL: outputDir,
-                tags: getActiveTags(),
-                overwritePolicy: selectedOverwritePolicy
+            .padding(ReMasteraDesign.space12)
+            .background(
+                isSelected ? ReMasteraDesign.brandSofter :
+                (isHovered ? ReMasteraDesign.surfaceElevated : .clear)
             )
-            
-            queueManager.addJob(
-                sourceURL: fileURL,
-                destinationURL: destURL,
-                preset: selectedPreset,
-                isDenoiseEnabled: isDenoiseEnabled,
-                isFilmLookEnabled: isFilmLookEnabled,
-                isSubtitleEnabled: isSubtitleEnabled,
-                isUpscaleEnabled: isUpscaleEnabled,
-                isHdr10Enabled: isHdr10Enabled
+            .clipShape(RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase))
+            .overlay(
+                RoundedRectangle(cornerRadius: ReMasteraDesign.radiusBase)
+                    .stroke(isSelected ? ReMasteraDesign.borderSubtle : .clear, lineWidth: 1)
             )
         }
-        
-        // Reset selections after queuing
-        self.sourceURL = nil
-        self.discoveredVideos = []
-        self.isDirectorySource = false
-    }
-    
-    private func getActiveTags() -> [String] {
-        return [
-            isDenoiseEnabled ? "denoised" : nil,
-            isFilmLookEnabled ? "kodak" : nil,
-            isSubtitleEnabled ? "subtitles" : nil,
-            isUpscaleEnabled ? "upscaled" : nil,
-            isHdr10Enabled ? "hdr10" : nil
-        ].compactMap { $0 }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.15)) { isHovered = hovering }
+        }
     }
 }
