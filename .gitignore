@@ -38,3 +38,7 @@ src/
 .codegraph/
 .codegraph
 .vscode/
+
+# Build Artifacts
+*.app/
+*.dmg

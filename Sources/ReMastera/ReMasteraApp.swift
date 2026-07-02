@@ -9,7 +9,7 @@ public struct ReMasteraApp: App {
     public var body: some Scene {
         WindowGroup {
             ZStack {
-                ReMasteraDesign.black.ignoresSafeArea()
+                ReMasteraDesign.background.ignoresSafeArea()
                 
                 HStack(spacing: 0) {
                     SidebarView(selection: $selection)
@@ -21,7 +21,7 @@ public struct ReMasteraApp: App {
                     
                     // Detail view
                     ZStack {
-                        ReMasteraDesign.black.ignoresSafeArea()
+                        ReMasteraDesign.background.ignoresSafeArea()
                         
                         switch selection {
                         case .assistant:
@@ -40,7 +40,6 @@ public struct ReMasteraApp: App {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
             .frame(minWidth: 1060, minHeight: 680)
         }
         .windowStyle(.hiddenTitleBar)

@@ -69,9 +69,40 @@ echo "  -> Creating ZIP archive..."
 echo "  -> Creating DMG volume..."
 hdiutil create -volname "ReMastera Installer" -srcfolder "$APP_DIR" -ov -format UDZO "build/Dist/ReMastera.dmg" >/dev/null
 
+# 6. Copy artifacts to the project root directory
+echo "Step 6: Copying ReMastera.app and ReMastera.dmg to the project root directory..."
+rm -rf "ReMastera.app"
+cp -R "$APP_DIR" "ReMastera.app"
+cp "build/Dist/ReMastera.dmg" "ReMastera.dmg"
+
+# 7. Deploy to ~/Applications/ReMastera.app with timestamped backups of any existing installation
+echo "Step 7: Deploying to ~/Applications/ReMastera.app..."
+APPLICATIONS_DIR="$HOME/Applications"
+mkdir -p "$APPLICATIONS_DIR"
+TARGET_APP="$APPLICATIONS_DIR/ReMastera.app"
+
+if [ -d "$TARGET_APP" ]; then
+    MONTH=$(date "+%b")
+    DAY=$(date "+%d")
+    YEAR=$(date "+%Y")
+    HOUR=$(date "+%I")
+    MINUTE=$(date "+%M")
+    AMPM=$(date "+%p" | tr 'A-Z' 'a-z')
+    TIMESTAMP="${MONTH}-${DAY}-${YEAR}-${HOUR}-${MINUTE}-${AMPM}"
+    RENAMED_APP="$APPLICATIONS_DIR/ReMastera-${TIMESTAMP}.app"
+    echo "  -> Renaming existing app to $(basename "$RENAMED_APP")"
+    mv "$TARGET_APP" "$RENAMED_APP"
+fi
+
+echo "  -> Copying new version to ~/Applications/ReMastera.app"
+cp -R "ReMastera.app" "$TARGET_APP"
+
 echo ""
 echo "=================================================="
 echo "Packaging complete: build/Dist/ReMastera-macOS.zip"
+echo "Root App: ReMastera.app"
+echo "Root DMG: ReMastera.dmg"
+echo "Applications App: ~/Applications/ReMastera.app"
 echo "=================================================="
 echo ""
 echo "Note on Codesigning and Notarization:"
