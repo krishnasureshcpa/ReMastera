@@ -17,9 +17,12 @@ rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR/Contents/MacOS"
 mkdir -p "$APP_DIR/Contents/Resources"
 
-# 3. Copy compiled binary
-echo "Step 3: Copying executable..."
+# 3. Copy compiled binary and resources
+echo "Step 3: Copying executable and resources..."
 cp ".build/release/ReMastera" "$APP_DIR/Contents/MacOS/ReMastera"
+if [ -f "Assets/AppIcon.icns" ]; then
+    cp "Assets/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
+fi
 
 # 4. Generate Info.plist
 echo "Step 4: Writing Info.plist metadata..."
@@ -32,6 +35,8 @@ cat <<EOF > "$APP_DIR/Contents/Info.plist"
     <string>en</string>
     <key>CFBundleExecutable</key>
     <string>ReMastera</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.sgkrishna.remastera</string>
     <key>CFBundleInfoDictionaryVersion</key>
