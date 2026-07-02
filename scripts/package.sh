@@ -17,9 +17,25 @@ rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR/Contents/MacOS"
 mkdir -p "$APP_DIR/Contents/Resources"
 
-# 3. Copy compiled binary and resources
-echo "Step 3: Copying executable and resources..."
+# 3. Copy compiled binary, frameworks and resources
+echo "Step 3: Copying executable, frameworks, and resources..."
 cp ".build/release/ReMastera" "$APP_DIR/Contents/MacOS/ReMastera"
+
+# Copy dynamic binary framework dependencies (e.g. Sparkle, RiveRuntime)
+mkdir -p "$APP_DIR/Contents/Frameworks"
+if [ -d ".build/arm64-apple-macosx/release" ]; then
+    find .build/arm64-apple-macosx/release -name "*.framework" -maxdepth 1 -exec cp -R {} "$APP_DIR/Contents/Frameworks/" \;
+elif [ -d ".build/x86_64-apple-macosx/release" ]; then
+    find .build/x86_64-apple-macosx/release -name "*.framework" -maxdepth 1 -exec cp -R {} "$APP_DIR/Contents/Frameworks/" \;
+else
+    # Dynamic search fallback
+    find .build -type d -path "*/release/*.framework" -exec cp -R {} "$APP_DIR/Contents/Frameworks/" \;
+fi
+
+# Configure executable runpath search path (rpath) to search the Frameworks directory
+echo "  -> Tweaking executable runpath search paths..."
+install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_DIR/Contents/MacOS/ReMastera" || true
+
 if [ -f "Assets/AppIcon.icns" ]; then
     cp "Assets/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
 fi
