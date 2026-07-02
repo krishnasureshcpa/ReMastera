@@ -13,11 +13,18 @@ let package = Package(
         .executable(name: "ReMasteraTests", targets: ["ReMasteraTests"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
+        .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.12.0")
     ],
     targets: [
         .target(
             name: "ReMasteraCore",
+            dependencies: [
+                .product(name: "MLX", package: "mlx-swift"),
+                .product(name: "MLXRandom", package: "mlx-swift"),
+                .product(name: "MLXNN", package: "mlx-swift"),
+                .product(name: "MLXOptimizers", package: "mlx-swift")
+            ],
             path: "Sources/ReMastera"
         ),
         .executableTarget(

@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct ReMasteraApp: App {
     @State private var queueManager = QueueManager()
-    @State private var selection: NavigationTarget = .dashboard
+    @State private var selection: NavigationTarget = .assistant
     
     public init() {}
     
@@ -12,6 +12,8 @@ public struct ReMasteraApp: App {
                 SidebarView(selection: $selection)
             } detail: {
                 switch selection {
+                case .assistant:
+                    WelcomeAssistantView()
                 case .dashboard:
                     DashboardView(queueManager: queueManager)
                 case .queue:

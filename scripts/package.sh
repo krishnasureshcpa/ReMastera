@@ -54,10 +54,15 @@ cat <<EOF > "$APP_DIR/Contents/Info.plist"
 </plist>
 EOF
 
-# 5. Compress the app bundle
-echo "Step 5: Zipping app bundle for release distribution..."
+# 5. Compress the app bundle and generate DMG
+echo "Step 5: Generating DMG and Zip for distribution..."
 mkdir -p build/Dist
+
+echo "  -> Creating ZIP archive..."
 (cd build && zip -r -y "Dist/ReMastera-macOS.zip" "ReMastera.app" >/dev/null)
+
+echo "  -> Creating DMG volume..."
+hdiutil create -volname "ReMastera Installer" -srcfolder "$APP_DIR" -ov -format UDZO "build/Dist/ReMastera.dmg" >/dev/null
 
 echo ""
 echo "=================================================="

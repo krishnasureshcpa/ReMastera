@@ -1,6 +1,7 @@
 import SwiftUI
 
 public enum NavigationTarget: String, CaseIterable, Identifiable {
+    case assistant
     case dashboard
     case queue
     case dependencies
@@ -11,6 +12,7 @@ public enum NavigationTarget: String, CaseIterable, Identifiable {
     
     public var displayName: String {
         switch self {
+        case .assistant: return "AI Assistant"
         case .dashboard: return "Dashboard"
         case .queue: return "Processing Queue"
         case .dependencies: return "Dependency Manager"
@@ -21,6 +23,7 @@ public enum NavigationTarget: String, CaseIterable, Identifiable {
     
     public var iconName: String {
         switch self {
+        case .assistant: return "sparkles"
         case .dashboard: return "square.grid.2x2"
         case .queue: return "film.stack"
         case .dependencies: return "cpu"
