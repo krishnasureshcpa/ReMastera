@@ -1,0 +1,40 @@
+# OS Metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon\r
+._*
+
+# Xcode / macOS Development
+build/
+DerivedData/
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj
+
+# Swift Package Manager
+.build/
+Packages/
+.swiftpm/
+Package.resolved
+
+# Local/Python/oMLX virtual environments and tooling
+venv/
+.venv/
+__pycache__/
+*.pyc
+omlx.egg-info/
+dist/
+
+# Application Specific / Temp / Logs
+*.log
+temp/
+tmp/
+*.tmp
+.omo/
+Ornith-1.0-9B/
+deepreinforce-ai/
+src/
+.codegraph/
+.codegraph
+.vscode/
