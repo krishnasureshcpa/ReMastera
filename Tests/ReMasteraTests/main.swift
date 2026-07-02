@@ -105,7 +105,7 @@ testEstimatedFileSizeCalculation()
 testPresetBitratesCheck()
 testOutputPathConstructionAndFolderMirroring()
 testLocateToolsPathDetection()
-await testPipelineCancellationStateUpdates()
+testPipelineCancellationStateUpdates()
 
 print("==================================================")
 print("All unit tests passed successfully!")

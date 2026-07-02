@@ -33,6 +33,16 @@ ReMastera is designed on a local-first architecture. It guarantees:
 - Subtitle Stage: Detects and executes subtitle extractions using local `whisper-cli` tooling.
 - Active Queue Manager: Lists pending, processing, completed, and failed tasks with custom console logs and retry actions.
 
+### Immersive Interactive CLI Dashboard
+ReMastera provides a stunning Terminal User Interface (TUI) built using Python's `Rich` and `Textual`. It runs the Swift video-processing core asynchronously in the background while displaying real-time rendering metrics, progress bars, and cinematic amber-themed logs.
+
+To install and launch the CLI dashboard:
+```bash
+./scripts/install-cli.sh
+source cli/.venv/bin/activate
+remastera --help
+```
+
 ### Planned for Future Release
 
 - Core ML Real-ESRGAN: True neural resolution enhancement using Apple Silicon Neural Engine accelerators.

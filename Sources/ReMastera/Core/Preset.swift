@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Preset: String, Codable, CaseIterable, Identifiable, Equatable {
+public enum Preset: String, Codable, CaseIterable, Identifiable, Equatable, Sendable {
     case fastPreview = "fast-preview"
     case compact4K = "compact-4k"
     case balanced4K = "balanced-4k"

@@ -1,6 +1,6 @@
 import Foundation
 
-public enum JobStatus: String, Codable, Equatable {
+public enum JobStatus: String, Codable, Equatable, Sendable {
     case queued
     case processing
     case completed

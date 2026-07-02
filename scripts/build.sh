@@ -17,5 +17,6 @@ swift build -c release
 
 echo ""
 echo "Compilation complete."
-echo "Executable generated at: .build/release/ReMastera"
-echo "To run, execute: .build/release/ReMastera"
+echo "App Executable generated at: .build/release/ReMastera"
+echo "CLI Executable generated at: .build/release/ReMasteraCLI"
+echo "To run the app, execute: .build/release/ReMastera"

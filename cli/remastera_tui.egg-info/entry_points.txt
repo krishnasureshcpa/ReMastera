@@ -1,0 +1,2 @@
+[console_scripts]
+remastera = remastera_tui.cli:app

@@ -9,7 +9,11 @@ let package = Package(
     products: [
         .library(name: "ReMasteraCore", targets: ["ReMasteraCore"]),
         .executable(name: "ReMastera", targets: ["ReMastera"]),
+        .executable(name: "ReMasteraCLI", targets: ["ReMasteraCLI"]),
         .executable(name: "ReMasteraTests", targets: ["ReMasteraTests"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
     ],
     targets: [
         .target(
@@ -20,6 +24,14 @@ let package = Package(
             name: "ReMastera",
             dependencies: ["ReMasteraCore"],
             path: "Sources/AppMain"
+        ),
+        .executableTarget(
+            name: "ReMasteraCLI",
+            dependencies: [
+                "ReMasteraCore",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ],
+            path: "Sources/ReMasteraCLI"
         ),
         .executableTarget(
             name: "ReMasteraTests",

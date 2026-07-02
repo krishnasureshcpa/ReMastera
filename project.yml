@@ -2,12 +2,31 @@ name: ReMastera
 options:
   bundleIdPrefix: com.sgkrishna
 targets:
+  ReMasteraCore:
+    type: framework
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/ReMastera
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.sgkrishna.remasteracore
+      SWIFT_VERSION: "6.0"
+      GCC_WARN_ABOUT_RETURN_TYPE: YES_ERROR
+      GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
+      CLANG_WARN_IMPLICIT_FALLTHROUGH: YES
+      GCC_WARN_64_TO_32_BIT_CONVERSION: YES
+      CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER: YES
+      CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND: YES
+      CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY: YES
+
   ReMastera:
     type: application
     platform: macOS
     deploymentTarget: "14.0"
     sources:
-      - path: Sources/ReMastera
+      - path: Sources/AppMain
+    dependencies:
+      - target: ReMasteraCore
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.sgkrishna.remastera
       PRODUCT_NAME: ReMastera
@@ -16,17 +35,8 @@ targets:
       GENERATE_INFOPLIST_FILE: YES
       INFOPLIST_KEY_LSMinimumSystemVersion: "14.0"
       INFOPLIST_KEY_NSPrincipalClass: NSApplication
-      # Modern Swift settings
       SWIFT_VERSION: "6.0"
-      SWIFT_UPCAST_FROM_EXISTENTIAL: YES
-      # Security audit recommendations
-      GCC_WARN_ABOUT_RETURN_TYPE: YES_ERROR
-      GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
-      CLANG_WARN_IMPLICIT_FALLTHROUGH: YES
-      GCC_WARN_64_TO_32_BIT_CONVERSION: YES
-      CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER: YES
-      CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND: YES
-      CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY: YES
+
   ReMasteraTests:
     type: bundle.unit-test
     platform: macOS
@@ -34,7 +44,22 @@ targets:
     sources:
       - path: Tests/ReMasteraTests
     dependencies:
-      - target: ReMastera
+      - target: ReMasteraCore
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.sgkrishna.remasteratests
       SWIFT_VERSION: "6.0"
+
+  ReMasteraCLI:
+    type: tool
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/ReMasteraCLI
+    dependencies:
+      - target: ReMasteraCore
+      - package: swift-argument-parser
+
+packages:
+  swift-argument-parser:
+    url: https://github.com/apple/swift-argument-parser
+    from: 1.3.0
