@@ -1,4 +1,22 @@
-# ReMastera macOS Media Processing Suite
+<div align="center">
+  <h1>ReMastera</h1>
+  <p><b>Native macOS Media Processing Suite</b></p>
+
+  <p>
+    <a href="https://github.com/krishnasureshcpa/ReMastera/releases">
+      <img src="https://img.shields.io/github/v/release/krishnasureshcpa/ReMastera?style=flat-square&color=007AFF&logo=apple" alt="Release" />
+    </a>
+    <a href="https://swift.org">
+      <img src="https://img.shields.io/badge/Swift-6.0-F05138.svg?style=flat-square&logo=swift" alt="Swift 6.0" />
+    </a>
+    <a href="https://developer.apple.com/macos">
+      <img src="https://img.shields.io/badge/macOS-14.0%2B-000000.svg?style=flat-square&logo=apple" alt="macOS 14.0+" />
+    </a>
+    <a href="https://github.com/krishnasureshcpa/ReMastera/actions">
+      <img src="https://img.shields.io/github/actions/workflow/status/krishnasureshcpa/ReMastera/ci.yml?style=flat-square&logo=githubactions" alt="Build Status" />
+    </a>
+  </p>
+</div>
 
 ReMastera is a native macOS application for local, private, and offline video remastering. It restores and refines old or low-quality videos into modern, clean, and cinematic masters while maintaining efficient output file sizes.
 
